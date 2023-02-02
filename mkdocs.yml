@@ -1,0 +1,10 @@
+site_name: pytest-cs
+site_description: Pytest fixtures for crowdsec
+site_author: CrowdSec
+
+theme: readthedocs
+
+repo_url: https://github.com/mmetc/pytest-cs
+
+pages:
+- Home: index.md
