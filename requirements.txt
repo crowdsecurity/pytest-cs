@@ -1,0 +1,7 @@
+docker
+gnureadline
+requests
+trustme
+pyyaml
+pytest
+pytest-dotenv
