@@ -258,6 +258,45 @@ def helm(kind):
     return closure
 
 
+# Return the last 'tail' lines of the container's logs (either a number or the string 'all')
+# The default is a measure to avoid performance or memory issues.
+def log_lines(cont, tail=10000):
+    return cont.logs(tail=tail).decode('utf-8').splitlines()
+
+
+class log_waiters:
+    def __init__(self, cont, timeout):
+        self.cont = cont
+        self.timeout = timeout
+        self.step = .5
+        self.done = False
+        self.failure = None
+
+    def __iter__(self):
+        while not self.done and self.timeout > 0:
+            yield self
+            time.sleep(self.step)
+            self.timeout -= self.step
+
+        if self.done:
+            return True
+
+        if self.failure:
+            raise self.failure
+
+    def __enter__(self):
+        self.failure = None
+        return pytest.LineMatcher(log_lines(self.cont))
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type is None:
+            self.done = True
+        else:
+            self.failure = exc_val
+
+        return True
+
+
 def wait_for_status(cont, status, timeout=30):
     start = time.monotonic()
     now = start
@@ -268,12 +307,6 @@ def wait_for_status(cont, status, timeout=30):
         time.sleep(.1)
         now = time.monotonic()
     raise TimeoutError(f'Container {cont.name} ({cont.status}) did not reach state {status} in {timeout} seconds')
-
-
-# Return the last 'tail' lines of the container's logs (either a number or the string 'all')
-# The default is a measure to avoid performance or memory issues.
-def log_lines(cont, tail=10000):
-    return cont.logs(tail=tail).decode('utf-8').splitlines()
 
 
 # watch the container's logs for a line containing the given string
