@@ -11,7 +11,6 @@ import docker.errors
 import pytest
 import trustme
 
-import re
 import time
 
 keep_kind_cluster = True
@@ -264,16 +263,17 @@ def log_lines(cont, tail=10000):
     return cont.logs(tail=tail).decode('utf-8').splitlines()
 
 
-class log_waiters:
+class waiters:
     def __init__(self, cont, timeout):
-        self.cont = cont
+        self.start = time.monotonic()
         self.timeout = timeout
-        self.step = .5
+        self.cont = cont
+        self.step = .1
         self.done = False
         self.failure = None
 
     def __iter__(self):
-        while not self.done and self.timeout > 0:
+        while not self.done and (self.start + self.timeout > time.monotonic()):
             yield self
             time.sleep(self.step)
             self.timeout -= self.step
@@ -284,9 +284,12 @@ class log_waiters:
         if self.failure:
             raise self.failure
 
+    def context(self):
+        raise NotImplementedError
+
     def __enter__(self):
         self.failure = None
-        return pytest.LineMatcher(log_lines(self.cont))
+        return self.context()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_type is None:
@@ -295,6 +298,11 @@ class log_waiters:
             self.failure = exc_val
 
         return True
+
+
+class log_waiters(waiters):
+    def context(self):
+        return pytest.LineMatcher(log_lines(self.cont))
 
 
 def wait_for_status(cont, status, timeout=30):
@@ -309,34 +317,11 @@ def wait_for_status(cont, status, timeout=30):
     raise TimeoutError(f'Container {cont.name} ({cont.status}) did not reach state {status} in {timeout} seconds')
 
 
-# watch the container's logs for a line containing the given string
 def wait_for_log(cont, s, timeout=30):
-    start = time.monotonic()
-    now = start
-    while (now - start) < timeout:
-        lines = log_lines(cont)
-        for line in lines:
-            if s in line:
-                return
-        time.sleep(.1)
-        now = time.monotonic()
-    raise TimeoutError(f'Container {cont.name} did not log "{s}" in {timeout} seconds')
-
-
-# watch the container's logs for a line matching the given regex
-def wait_for_log_re(cont, regex, timeout=30):
-    if not hasattr(regex, 'search'):
-        regex = re.compile(regex)
-    start = time.monotonic()
-    now = start
-    while (now - start) < timeout:
-        lines = log_lines(cont)
-        for line in lines:
-            if regex.search(line):
-                return
-        time.sleep(.1)
-        now = time.monotonic()
-    raise TimeoutError(f'Container {cont.name} did not log r"{regex.pattern}" in {timeout} seconds')
+    for waiter in log_waiters(cont, timeout):
+        with waiter as matcher:
+            if matcher.fnmatch_lines([s]):
+                return True
 
 
 class Status:

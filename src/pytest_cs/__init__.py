@@ -12,7 +12,6 @@ from .plugin import (
     log_lines,
     log_waiters,
     wait_for_log,
-    wait_for_log_re,
     Status,
 )
 
@@ -30,6 +29,5 @@ __all__ = [
     "log_lines",
     "log_waiters",
     "wait_for_log",
-    "wait_for_log_re",
     "Status",
 ]
