@@ -16,6 +16,8 @@ import time
 
 keep_kind_cluster = True
 
+DEFAULT_TIMEOUT = 30
+
 
 @pytest.fixture(scope='session')
 def certs_dir(tmp_path_factory):
@@ -283,6 +285,10 @@ class waiters:
             self.timeout -= self.step
             self.iteration += 1
 
+            # until the last iteration, we ignore assertion errors
+            if self.failure and not isinstance(self.failure, AssertionError):
+                raise self.failure
+
         if self.done:
             return True
 
@@ -339,7 +345,7 @@ class port_waiters(waiters):
         return Probe(self.cont.ports)
 
 
-def wait_for_status(cont, status, timeout=10):
+def wait_for_status(cont, status, timeout=DEFAULT_TIMEOUT):
     start = time.monotonic()
     now = start
     while (now - start) < timeout:
@@ -351,7 +357,7 @@ def wait_for_status(cont, status, timeout=10):
     raise TimeoutError(f'Container {cont.name} ({cont.status}) did not reach state {status} in {timeout} seconds')
 
 
-def wait_for_log(cont, s, timeout=10):
+def wait_for_log(cont, s, timeout=DEFAULT_TIMEOUT):
     if isinstance(s, str):
         s = [s]
     for waiter in log_waiters(cont, timeout):
@@ -359,13 +365,16 @@ def wait_for_log(cont, s, timeout=10):
             matcher.fnmatch_lines(s)
 
 
-def wait_for_http(cont, port, path, timeout=10):
+def wait_for_http(cont, port, path, status_code=None, timeout=DEFAULT_TIMEOUT):
     for waiter in port_waiters(cont, timeout):
-        print(waiter.iteration)
         with waiter as probe:
             status = probe.http_status_code(port, path)
-            # raise an exception if the iteration is not valid (i.e. the check must be retried)
+            # the iteration is invalidated if it raises an exception (i.e. the check will be retried)
             assert status is not None
+            # wait for a specific status code - this could be behind a proxy/load balancer
+            # status_code=None if we don't care about it
+            if status_code is not None:
+                assert status == status_code
             return status
 
 
