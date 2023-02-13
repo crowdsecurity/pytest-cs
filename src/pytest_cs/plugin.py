@@ -9,6 +9,7 @@ import textwrap
 import docker
 import docker.errors
 import pytest
+import requests
 import trustme
 
 import time
@@ -141,7 +142,7 @@ def crowdsec(docker_client, crowdsec_version, docker_network):
         kw['environment']['CI_TESTING'] = 'true'
 
         # TODO:
-        # kw.setdefault('ports', {'8080': None, '6060': None})
+        kw.setdefault('ports', {'8080': None, '6060': None})
 
         cont = pull_and_create_container(docker_client, *args, **kw)
         cont.start()
@@ -271,12 +272,16 @@ class waiters:
         self.step = .1
         self.done = False
         self.failure = None
+        # for debugging
+        self.iteration = 0
 
     def __iter__(self):
         while not self.done and (self.start + self.timeout > time.monotonic()):
+            self.cont.reload()
             yield self
             time.sleep(self.step)
             self.timeout -= self.step
+            self.iteration += 1
 
         if self.done:
             return True
@@ -305,7 +310,36 @@ class log_waiters(waiters):
         return pytest.LineMatcher(log_lines(self.cont))
 
 
-def wait_for_status(cont, status, timeout=30):
+class Probe:
+    def __init__(self, ports):
+        self.ports = ports
+
+    def get_bound_port(self, port):
+        full_port = f'{port}/tcp'
+        if full_port not in self.ports:
+            return None
+        return self.ports[full_port][0]['HostPort']
+
+    def http_status_code(self, port, path):
+        bound_port = self.get_bound_port(port)
+        if bound_port is None:
+            return None
+
+        url = f'http://localhost:{bound_port}{path}'
+
+        try:
+            r = requests.get(url)
+        except requests.exceptions.ConnectionError:
+            return None
+        return r.status_code
+
+
+class port_waiters(waiters):
+    def context(self):
+        return Probe(self.cont.ports)
+
+
+def wait_for_status(cont, status, timeout=10):
     start = time.monotonic()
     now = start
     while (now - start) < timeout:
@@ -317,11 +351,22 @@ def wait_for_status(cont, status, timeout=30):
     raise TimeoutError(f'Container {cont.name} ({cont.status}) did not reach state {status} in {timeout} seconds')
 
 
-def wait_for_log(cont, s, timeout=30):
+def wait_for_log(cont, s, timeout=10):
+    if isinstance(s, str):
+        s = [s]
     for waiter in log_waiters(cont, timeout):
         with waiter as matcher:
-            if matcher.fnmatch_lines([s]):
-                return True
+            matcher.fnmatch_lines(s)
+
+
+def wait_for_http(cont, port, path, timeout=10):
+    for waiter in port_waiters(cont, timeout):
+        print(waiter.iteration)
+        with waiter as probe:
+            status = probe.http_status_code(port, path)
+            # raise an exception if the iteration is not valid (i.e. the check must be retried)
+            assert status is not None
+            return status
 
 
 class Status:

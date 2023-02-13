@@ -5,3 +5,5 @@ trustme
 pyyaml
 pytest
 pytest-dotenv
+gnureadline
+ipdb
