@@ -9,6 +9,7 @@ import textwrap
 import docker
 import docker.errors
 import pytest
+from _pytest.outcomes import Failed
 import requests
 import trustme
 
@@ -285,8 +286,9 @@ class waiters:
             self.timeout -= self.step
             self.iteration += 1
 
-            # until the last iteration, we ignore assertion errors
-            if self.failure and not isinstance(self.failure, AssertionError):
+            # until the last iteration, we ignore test failures
+            if (self.failure and not isinstance(self.failure, AssertionError)
+                    and not isinstance(self.failure, Failed)):
                 raise self.failure
 
         if self.done:
@@ -365,7 +367,7 @@ def wait_for_log(cont, s, timeout=DEFAULT_TIMEOUT):
             matcher.fnmatch_lines(s)
 
 
-def wait_for_http(cont, port, path, status_code=None, timeout=DEFAULT_TIMEOUT):
+def wait_for_http(cont, port, path, want_status=None, timeout=DEFAULT_TIMEOUT):
     for waiter in port_waiters(cont, timeout):
         with waiter as probe:
             status = probe.http_status_code(port, path)
@@ -373,8 +375,8 @@ def wait_for_http(cont, port, path, status_code=None, timeout=DEFAULT_TIMEOUT):
             assert status is not None
             # wait for a specific status code - this could be behind a proxy/load balancer
             # status_code=None if we don't care about it
-            if status_code is not None:
-                assert status == status_code
+            if want_status is not None:
+                assert status == want_status
             return status
 
 
