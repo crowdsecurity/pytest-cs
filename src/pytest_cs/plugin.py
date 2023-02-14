@@ -268,7 +268,7 @@ def log_lines(cont, tail=10000):
 
 
 class waiters:
-    def __init__(self, cont, timeout):
+    def __init__(self, cont, timeout=DEFAULT_TIMEOUT):
         self.start = time.monotonic()
         self.timeout = timeout
         self.cont = cont
