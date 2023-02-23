@@ -15,6 +15,8 @@ from .plugin import (
     wait_for_log,
     wait_for_http,
     Status,
+    WaiterGenerator,
+    ContainerWaiterGenerator,
 )
 
 __all__ = [
@@ -34,4 +36,6 @@ __all__ = [
     "wait_for_log",
     "wait_for_http",
     "Status",
+    "WaiterGenerator",
+    "ContainerWaiterGenerator",
 ]
