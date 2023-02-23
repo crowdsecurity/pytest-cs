@@ -267,20 +267,39 @@ def log_lines(cont, tail=10000):
     return cont.logs(tail=tail).decode('utf-8').splitlines()
 
 
-class waiters:
-    def __init__(self, cont, timeout=DEFAULT_TIMEOUT):
+# Implement a constuct to wait for any condition to be true without a busy loop.
+# It must be subclassed to return the context.
+#
+# Example:
+#
+#  for waiter in some_waiter(params, timeout=2):
+#    with waiter as ctx:
+#       assert ctx.some_condition()
+#       assert ctx.some_other_condition()
+#       assert ctx.yet_another_condition()
+class WaiterGenerator:
+    def __init__(self, timeout=DEFAULT_TIMEOUT, step=.1):
         self.start = time.monotonic()
         self.timeout = timeout
-        self.cont = cont
-        self.step = .1
-        self.done = False
-        self.failure = None
-        # for debugging
-        self.iteration = 0
+        self.step = step        # wait between iterations
+        self.done = False       # set to True to stop the iteration
+        self.failure = None     # capture an exception to raise on the last iteration
+        self.iteration = 0      # for debugging
 
+    # Yield a context manager until the timeout is reached.
+    #
+    # When a with: block is executed with no exceptions that
+    # could indicate a test failure, the iteration is stopped.
+    # The test is on its way to success :)
+    #
+    # If there were exceptions (of type AssertionError or Failed)
+    # the iteration is continued until the timeout is reached.
+    #
+    # On its last iteration before the timeout, any exception
+    # is allowed to propagate and will cause the test to fail.
     def __iter__(self):
         while not self.done and (self.start + self.timeout > time.monotonic()):
-            self.cont.reload()
+            self.refresh()
             yield self
             time.sleep(self.step)
             self.timeout -= self.step
@@ -297,13 +316,27 @@ class waiters:
         if self.failure:
             raise self.failure
 
+    # this is returned by the context manager.
     def context(self):
         raise NotImplementedError
 
+    # this is called before each iteration to refresh the state
+    # of the object: reload a container, etc.
+    def refresh(self):
+        pass
+
+    # Enter the with: block
+    # self.failure is reset because we only care about the last failure
+    # (i.e. the one that caused the timeout)
     def __enter__(self):
         self.failure = None
         return self.context()
 
+    # Exit the with: block
+    # if there was no exception, we set self.done to True to stop the iteration
+    # otherwise, we capture the exception
+    # we always return True to prevent the exception from propagating
+    # (we'll raise it on the last iteration)
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_type is None:
             self.done = True
@@ -313,7 +346,17 @@ class waiters:
         return True
 
 
-class log_waiters(waiters):
+class ContainerWaiterGenerator(WaiterGenerator):
+    def __init__(self, cont, timeout=DEFAULT_TIMEOUT):
+        super().__init__(timeout)
+        self.cont = cont
+
+    def refresh(self):
+        self.cont.reload()
+        super().refresh()
+
+
+class log_waiters(ContainerWaiterGenerator):
     def context(self):
         return pytest.LineMatcher(log_lines(self.cont))
 
@@ -342,7 +385,7 @@ class Probe:
         return r.status_code
 
 
-class port_waiters(waiters):
+class port_waiters(ContainerWaiterGenerator):
     def context(self):
         return Probe(self.cont.ports)
 
