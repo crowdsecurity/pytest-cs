@@ -154,13 +154,52 @@ def crowdsec(docker_client, crowdsec_version, docker_network):
             wait_for_status(cont, wait_status)
 
         try:
-            yield cont
+            yield CrowdsecContainer(cont)
         finally:
             cont.stop(timeout=0)
             cont.wait()
             cont.reload()
             cont.remove(force=True)
     return closure
+
+
+class Container:
+    def __init__(self, cont):
+        self.cont = cont
+
+    def log_waiters(self, *args, **kw):
+        return log_waiters(self.cont, *args, **kw)
+
+    def port_waiters(self, *args, **kw):
+        return port_waiters(self.cont, *args, **kw)
+
+    def wait_for_log(self, s, timeout=DEFAULT_TIMEOUT):
+        if isinstance(s, str):
+            s = [s]
+        for waiter in log_waiters(self.cont, timeout):
+            with waiter as matcher:
+                matcher.fnmatch_lines(s)
+
+    def wait_for_http(self, port, path, want_status=None, timeout=DEFAULT_TIMEOUT):
+        for waiter in port_waiters(self.cont, timeout):
+            with waiter as probe:
+                status = probe.http_status_code(port, path)
+                # the iteration is invalidated if it raises an exception (i.e. the check will be retried)
+                assert status is not None
+                # wait for a specific status code - this could be behind a proxy/load balancer
+                # status_code=None if we don't care about it
+                if want_status is not None:
+                    assert status == want_status
+                return status
+
+    # Return the last 'tail' lines of the container's logs (either a number or the string 'all')
+    # The default is a measure to avoid performance or memory issues.
+    def log_lines(self, tail=10000):
+        return self.cont.logs(tail=tail).decode('utf-8').splitlines()
+
+
+class CrowdsecContainer(Container):
+    pass
 
 
 @pytest.fixture(scope='session')
@@ -192,7 +231,7 @@ def container(docker_client, docker_network):
             wait_for_status(cont, wait_status)
 
         try:
-            yield cont
+            yield Container(cont)
         finally:
             cont.stop(timeout=0)
             cont.wait()
@@ -259,12 +298,6 @@ def helm(kind):
         finally:
             subprocess.run(['helm', 'uninstall', release, '--namespace', namespace], check=True)
     return closure
-
-
-# Return the last 'tail' lines of the container's logs (either a number or the string 'all')
-# The default is a measure to avoid performance or memory issues.
-def log_lines(cont, tail=10000):
-    return cont.logs(tail=tail).decode('utf-8').splitlines()
 
 
 # Implement a constuct to wait for any condition to be true without a busy loop.
@@ -356,11 +389,6 @@ class ContainerWaiterGenerator(WaiterGenerator):
         super().refresh()
 
 
-class log_waiters(ContainerWaiterGenerator):
-    def context(self):
-        return pytest.LineMatcher(log_lines(self.cont))
-
-
 class Probe:
     def __init__(self, ports):
         self.ports = ports
@@ -402,25 +430,10 @@ def wait_for_status(cont, status, timeout=DEFAULT_TIMEOUT):
     raise TimeoutError(f'Container {cont.name} ({cont.status}) did not reach state {status} in {timeout} seconds')
 
 
-def wait_for_log(cont, s, timeout=DEFAULT_TIMEOUT):
-    if isinstance(s, str):
-        s = [s]
-    for waiter in log_waiters(cont, timeout):
-        with waiter as matcher:
-            matcher.fnmatch_lines(s)
-
-
-def wait_for_http(cont, port, path, want_status=None, timeout=DEFAULT_TIMEOUT):
-    for waiter in port_waiters(cont, timeout):
-        with waiter as probe:
-            status = probe.http_status_code(port, path)
-            # the iteration is invalidated if it raises an exception (i.e. the check will be retried)
-            assert status is not None
-            # wait for a specific status code - this could be behind a proxy/load balancer
-            # status_code=None if we don't care about it
-            if want_status is not None:
-                assert status == want_status
-            return status
+class log_waiters(ContainerWaiterGenerator):
+    def context(self):
+        lines = self.cont.logs(tail=10000).decode('utf-8').splitlines()
+        return pytest.LineMatcher(lines)
 
 
 class Status:
