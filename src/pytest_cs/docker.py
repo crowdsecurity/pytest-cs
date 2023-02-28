@@ -138,6 +138,10 @@ class Container:
     def log_lines(self, tail=10000):
         return self.cont.logs(tail=tail).decode('utf-8').splitlines()
 
+    @property
+    def probe(self):
+        return Probe(self.cont.ports)
+
 
 class CrowdsecContainer(Container):
     pass
