@@ -18,4 +18,4 @@ jobs:
     - name: Run tests
       run: |
         python3 -m pip install tox
-        tox
+        PY_COLORS=1 tox
