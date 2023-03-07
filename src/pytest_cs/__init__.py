@@ -1,3 +1,6 @@
+from .bouncer import (
+    bouncer,
+)
 from .plugin import (
     certs_dir,
 )
@@ -25,6 +28,7 @@ from .waiters import (
 )
 
 __all__ = [
+    "bouncer",
     "certs_dir",
     "compose",
     "container",
