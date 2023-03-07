@@ -66,4 +66,4 @@ def helm(kind):
             yield release
         finally:
             subprocess.run(['helm', 'uninstall', release, '--namespace', namespace], check=True)
-    return closure
+    yield closure
