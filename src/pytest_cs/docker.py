@@ -43,7 +43,11 @@ def pull_and_create_container(docker_client, *args, **kwargs):
     try:
         return docker_client.containers.create(*args, **kwargs)
     except docker.errors.ImageNotFound:
-        repo, tag = kwargs['image'].split(':')
+        try:
+            repo, tag = kwargs['image'].split(':')
+        except ValueError:
+            repo = kwargs['image']
+            tag = 'latest'
         docker_client.images.pull(repo, tag)
         return docker_client.containers.create(*args, **kwargs)
 
