@@ -17,5 +17,6 @@ jobs:
 
     - name: Run tests
       run: |
+        docker network create net-test
         python3 -m pip install tox
         PY_COLORS=1 tox
