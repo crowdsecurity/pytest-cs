@@ -1,0 +1,22 @@
+name: Functional Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v3
+
+    - name: Run tests
+      run: |
+        docker network create net-test
+        python3 -m pip install tox
+        PY_COLORS=1 tox
