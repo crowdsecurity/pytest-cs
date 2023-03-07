@@ -1,9 +1,10 @@
 docker
 gnureadline
-requests
-trustme
-pyyaml
-pytest
-pytest-dotenv
 gnureadline
 ipdb
+psutil
+pytest
+pytest-dotenv
+pyyaml
+requests
+trustme

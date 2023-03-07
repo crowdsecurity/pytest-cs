@@ -8,7 +8,7 @@ keep_kind_cluster = True
 
 @pytest.fixture(scope='session')
 def certs_dir(tmp_path_factory):
-    def create(lapi_hostname, agent_ou='agent-ou'):
+    def closure(lapi_hostname, agent_ou='agent-ou'):
         path = tmp_path_factory.mktemp('certs')
 
         ca = trustme.CA()
@@ -23,4 +23,4 @@ def certs_dir(tmp_path_factory):
         agent_cert.private_key_pem.write_to_path(path / 'agent.key')
 
         return path
-    return create
+    yield closure
