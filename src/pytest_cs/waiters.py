@@ -4,7 +4,7 @@ from _pytest.outcomes import Failed
 
 import time
 
-DEFAULT_TIMEOUT = 30
+from .helpers import get_timeout
 
 
 # Implement a constuct to wait for any condition to be true without a busy loop.
@@ -18,7 +18,7 @@ DEFAULT_TIMEOUT = 30
 #       assert ctx.some_other_condition()
 #       assert ctx.yet_another_condition()
 class WaiterGenerator:
-    def __init__(self, timeout=DEFAULT_TIMEOUT, step=.1):
+    def __init__(self, timeout=get_timeout(), step=.1):
         self.start = time.monotonic()
         self.timeout = timeout
         self.step = step        # wait between iterations

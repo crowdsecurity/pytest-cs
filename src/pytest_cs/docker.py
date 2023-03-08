@@ -10,9 +10,8 @@ import requests
 
 import time
 
+from .helpers import get_timeout
 from .waiters import WaiterGenerator
-
-DEFAULT_TIMEOUT = 30
 
 
 @pytest.fixture(scope='session')
@@ -118,14 +117,14 @@ class Container:
     def port_waiters(self, *args, **kw):
         return port_waiters(self.cont, *args, **kw)
 
-    def wait_for_log(self, s, timeout=DEFAULT_TIMEOUT):
+    def wait_for_log(self, s, timeout=get_timeout()):
         if isinstance(s, str):
             s = [s]
         for waiter in log_waiters(self.cont, timeout):
             with waiter as matcher:
                 matcher.fnmatch_lines(s)
 
-    def wait_for_http(self, port, path, want_status=None, timeout=DEFAULT_TIMEOUT):
+    def wait_for_http(self, port, path, want_status=None, timeout=get_timeout()):
         for waiter in port_waiters(self.cont, timeout):
             with waiter as probe:
                 status = probe.http_status_code(port, path)
@@ -190,7 +189,7 @@ def container(docker_client, docker_network):
 
 
 class ContainerWaiterGenerator(WaiterGenerator):
-    def __init__(self, cont, timeout=DEFAULT_TIMEOUT):
+    def __init__(self, cont, timeout=get_timeout()):
         super().__init__(timeout)
         self.cont = cont
 
@@ -228,7 +227,7 @@ class port_waiters(ContainerWaiterGenerator):
         return Probe(self.cont.ports)
 
 
-def wait_for_status(cont, status, timeout=DEFAULT_TIMEOUT):
+def wait_for_status(cont, status, timeout=get_timeout()):
     start = time.monotonic()
     now = start
     while (now - start) < timeout:
