@@ -2,6 +2,7 @@ from .bouncer import (
     bouncer,
 )
 from .plugin import (
+    api_key_factory,
     certs_dir,
 )
 from .compose import (
@@ -28,6 +29,7 @@ from .waiters import (
 )
 
 __all__ = [
+    "api_key_factory",
     "bouncer",
     "certs_dir",
     "compose",
