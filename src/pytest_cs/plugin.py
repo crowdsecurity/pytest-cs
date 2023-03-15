@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import pytest
+import secrets
+import string
 import trustme
 
 keep_kind_cluster = True
@@ -23,4 +25,11 @@ def certs_dir(tmp_path_factory):
         agent_cert.private_key_pem.write_to_path(path / 'agent.key')
 
         return path
+    yield closure
+
+
+@pytest.fixture(scope='session')
+def api_key_factory():
+    def closure(alphabet=string.ascii_letters + string.digits):
+        return ''.join(secrets.choice(alphabet) for i in range(32))
     yield closure
