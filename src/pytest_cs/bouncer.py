@@ -9,7 +9,7 @@ import yaml
 from .waiters import WaiterGenerator
 
 # How long to wait for a child process to spawn
-CHILD_SPAWN_TIMEOUT = 1
+CHILD_SPAWN_TIMEOUT = 2
 
 
 class ProcessWaiterGenerator(WaiterGenerator):
