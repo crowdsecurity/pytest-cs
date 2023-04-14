@@ -20,11 +20,11 @@ def certs_dir(tmp_path_factory):
         lapi_cert.cert_chain_pems[0].write_to_path(path / 'lapi.crt')
         lapi_cert.private_key_pem.write_to_path(path / 'lapi.key')
 
-        agent_cert = ca.issue_cert('agent', common_name='agent', organization_unit_name=agent_ou)
+        agent_cert = ca.issue_cert('agent', organization_unit_name=agent_ou)
         agent_cert.cert_chain_pems[0].write_to_path(path / 'agent.crt')
         agent_cert.private_key_pem.write_to_path(path / 'agent.key')
 
-        bouncer_cert = ca.issue_cert('bouncer', common_name='bouncer', organization_unit_name=bouncer_ou)
+        bouncer_cert = ca.issue_cert('bouncer', organization_unit_name=bouncer_ou)
         bouncer_cert.cert_chain_pems[0].write_to_path(path / 'bouncer.crt')
         bouncer_cert.private_key_pem.write_to_path(path / 'bouncer.key')
 
