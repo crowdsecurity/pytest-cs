@@ -1,5 +1,6 @@
 from .bouncer import (
     bouncer,
+    bouncer_binary,
 )
 from .plugin import (
     api_key_factory,
@@ -27,10 +28,23 @@ from .k8s import (
 from .waiters import (
     WaiterGenerator,
 )
+from .misc import (
+    project_repo,
+)
+from .deb import (
+    deb_package_arch,
+    deb_package_name,
+    deb_package_path,
+    deb_package_version,
+)
+from .rpm import (
+    rpm_package_path,
+)
 
 __all__ = [
     "api_key_factory",
     "bouncer",
+    "bouncer_binary",
     "certs_dir",
     "compose",
     "container",
@@ -46,4 +60,10 @@ __all__ = [
     "Status",
     "WaiterGenerator",
     "wait_for_status",
+    "project_repo",
+    "deb_package_arch",
+    "deb_package_name",
+    "deb_package_path",
+    "deb_package_version",
+    "rpm_package_path",
 ]
