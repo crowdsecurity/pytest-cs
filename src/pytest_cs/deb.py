@@ -6,10 +6,13 @@ from .misc import lookup_project_repo
 
 def enum_package_names():
     repo = lookup_project_repo()
-    with open(repo / 'debian/control') as f:
-        for line in f:
-            if line.startswith('Package:'):
-                yield line.split()[1]
+    try:
+        with open(repo / 'debian/control') as f:
+            for line in f:
+                if line.startswith('Package:'):
+                    yield line.split()[1]
+    except FileNotFoundError:
+        pass
 
 
 @pytest.fixture(scope='session', params=enum_package_names())
