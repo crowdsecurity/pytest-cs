@@ -1,4 +1,5 @@
 import contextlib
+import os
 import subprocess
 import time
 
@@ -9,7 +10,7 @@ import yaml
 from .waiters import WaiterGenerator
 
 # How long to wait for a child process to spawn
-CHILD_SPAWN_TIMEOUT = 1
+CHILD_SPAWN_TIMEOUT = 2
 
 
 class ProcessWaiterGenerator(WaiterGenerator):
@@ -54,10 +55,13 @@ class BouncerProc:
                 p.get_output().fnmatch_lines(s)
 
 
+# The bouncer to use is provided by the fixture bouncer_under_test.
+# This won't work with different bouncers in the same test
+# scenario, but it's unlikely that we'll need that
 @pytest.fixture(scope='session')
-def bouncer(tmp_path_factory):
+def bouncer(bouncer_binary, tmp_path_factory,):
     @contextlib.contextmanager
-    def closure(bouncer_binary, config):
+    def closure(config):
         # create joint stout/stderr file
         outdir = tmp_path_factory.mktemp("output")
         confpath = outdir / "bouncer-config.yaml"
@@ -76,3 +80,11 @@ def bouncer(tmp_path_factory):
             cb.kill()
             cb.wait()
     yield closure
+
+
+@pytest.fixture(scope='session')
+def bouncer_binary(project_repo, bouncer_under_test):
+    binary_path = project_repo / bouncer_under_test
+    if not binary_path.exists() or not os.access(binary_path, os.X_OK):
+        raise RuntimeError(f"Bouncer binary not found at {binary_path}. Did you build it?")
+    yield binary_path
