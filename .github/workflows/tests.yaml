@@ -16,6 +16,8 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Run tests
+      env:
+        CROWDSEC_TEST_TIMEOUT: 60
       run: |
         docker network create net-test
         python3 -m pip install tox
