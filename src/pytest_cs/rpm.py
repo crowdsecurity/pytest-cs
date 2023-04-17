@@ -31,7 +31,7 @@ def rpmbuild(repodir, bouncer_under_test, version, package_number):
 
 
 @pytest.fixture(scope='session')
-def rpm_package_path(project_repo, deb_package_name):
+def rpm_package_path(project_repo, deb_package_name, bouncer_under_test):
     # Assume that the rpm package names are the same as the deb ones
     global rpm_build_done
     version = '1.0'
@@ -45,7 +45,10 @@ def rpm_package_path(project_repo, deb_package_name):
         if package_path.exists():
             # remove by hand, before running tests
             raise RuntimeError(f'Package {filename} already exists. Please remove it first.')
-        rpmbuild(version=version, package_number=package_number)
+        rpmbuild(repodir=project_repo,
+                 bouncer_under_test=bouncer_under_test,
+                 version=version,
+                 package_number=package_number)
         rpm_build_done = True
 
     yield package_path
