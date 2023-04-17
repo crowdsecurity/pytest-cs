@@ -3,7 +3,7 @@
 
 def test_crowdsec_log(crowdsec):
     with crowdsec() as cs:
-        for waiter in cs.log_waiters(timeout=10):
+        for waiter in cs.log_waiters():
             with waiter as matcher:
                 matcher.fnmatch_lines([
                     "*Loading prometheus collectors*",
@@ -27,7 +27,7 @@ def test_crowdsec_log_helper(crowdsec):
 
 def test_port_waiters(crowdsec):
     with crowdsec() as cs:
-        for waiter in cs.port_waiters(timeout=10):
+        for waiter in cs.port_waiters():
             with waiter as probe:
                 assert probe.get_bound_port(8080) is not None
                 assert probe.http_status_code(8080, '/health') == 200
