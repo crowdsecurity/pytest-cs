@@ -43,8 +43,8 @@ def rpm_package_path(project_repo, deb_package_name, bouncer_under_test):
 
     if not rpm_build_done:
         if package_path.exists():
-            # remove by hand, before running tests
-            raise RuntimeError(f'Package {filename} already exists. Please remove it first.')
+            # no need to tell the user to remove the file, as rpmbuild will do it
+            pass
         rpmbuild(repodir=project_repo,
                  bouncer_under_test=bouncer_under_test,
                  version=version,

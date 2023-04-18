@@ -52,7 +52,8 @@ def deb_package_path(deb_package_name, deb_package_version, deb_package_arch, pr
 
     if not deb_build_done:
         if package_path.exists():
-            # remove by hand, before running tests
+            # remove by hand, before running tests, because it's outside of the
+            # project directory
             raise RuntimeError(f'Package {filename} already exists. Please remove it first.')
         dpkg_buildpackage(repodir=project_repo)
         deb_build_done = True
