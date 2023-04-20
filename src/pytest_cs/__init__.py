@@ -40,6 +40,10 @@ from .deb import (
 from .rpm import (
     rpm_package_path,
 )
+from .rootcheck import (
+    must_be_root,
+    must_be_nonroot,
+)
 
 __all__ = [
     "api_key_factory",
@@ -66,4 +70,6 @@ __all__ = [
     "deb_package_path",
     "deb_package_version",
     "rpm_package_path",
+    "must_be_root",
+    "must_be_nonroot",
 ]
