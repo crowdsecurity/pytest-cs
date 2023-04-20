@@ -32,12 +32,14 @@ from .misc import (
     project_repo,
 )
 from .deb import (
+    deb_package,
     deb_package_arch,
     deb_package_name,
     deb_package_path,
     deb_package_version,
 )
 from .rpm import (
+    rpm_package,
     rpm_package_path,
 )
 from .rootcheck import (
@@ -65,10 +67,12 @@ __all__ = [
     "WaiterGenerator",
     "wait_for_status",
     "project_repo",
+    "deb_package",
     "deb_package_arch",
     "deb_package_name",
     "deb_package_path",
     "deb_package_version",
+    "rpm_package",
     "rpm_package_path",
     "must_be_root",
     "must_be_nonroot",
