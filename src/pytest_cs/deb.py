@@ -3,6 +3,8 @@ import subprocess
 
 from .misc import lookup_project_repo
 
+deb_build_done = False
+
 
 def enum_package_names():
     repo = lookup_project_repo()
@@ -35,24 +37,21 @@ def deb_package_arch():
     ).decode('utf-8').strip()
 
 
-deb_build_done = False
-
-
 def dpkg_buildpackage(repodir):
     subprocess.check_call(['make', 'clean-debian'], cwd=repodir)
-    subprocess.check_call(['dpkg-buildpackage', '-us', '-uc', '-b'],
-                          cwd=repodir)
+    subprocess.check_call(['dpkg-buildpackage', '-us', '-uc', '-b'], cwd=repodir)
 
 
 @pytest.fixture(scope='session')
 def deb_package_path(deb_package_name, deb_package_version, deb_package_arch, project_repo):
-    global deb_build_done
-    filename = f'{deb_package_name}_{deb_package_version}_{deb_package_arch}.deb'
-    package_path = project_repo.parent / filename
+    yield project_repo.parent / f'{deb_package_name}_{deb_package_version}_{deb_package_arch}.deb'
 
+
+@pytest.fixture(scope='session')
+def deb_package(deb_package_path, project_repo):
+    global deb_build_done
     if not deb_build_done:
-        package_path.unlink(missing_ok=True)
+        deb_package_path.unlink(missing_ok=True)
         dpkg_buildpackage(repodir=project_repo)
         deb_build_done = True
-
-    yield package_path
+    yield deb_package_path
