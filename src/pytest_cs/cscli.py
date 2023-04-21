@@ -15,7 +15,7 @@ def get_bouncers(**kw):
     lookup bouncers by key=value
     """
     out = subprocess.check_output(
-            ['cscli', 'bouncers', 'list', 'o', 'json'],
+            ['cscli', 'bouncers', 'list', '-o', 'json'],
             encoding='utf-8')
     for bouncer in json.loads(out):
         for key, value in kw.items():
