@@ -25,16 +25,18 @@ def deb_package_name(request):
 @pytest.fixture(scope='session')
 def deb_package_version(project_repo):
     return subprocess.check_output(
-            ['dpkg-parsechangelog', '-S', 'version'],
-            cwd=project_repo
-    ).decode('utf-8').strip()
+        ['dpkg-parsechangelog', '-S', 'version'],
+        encoding='utf-8',
+        cwd=project_repo
+    ).strip()
 
 
 @pytest.fixture(scope='session')
 def deb_package_arch():
     return subprocess.check_output(
-            ['dpkg-architecture', '-qDEB_BUILD_ARCH']
-    ).decode('utf-8').strip()
+        ['dpkg-architecture', '-qDEB_BUILD_ARCH'],
+        encoding='utf-8'
+    ).strip()
 
 
 def dpkg_buildpackage(repodir):
