@@ -38,8 +38,13 @@ def kind(tmp_path_factory):
         - role: worker
     '''))
 
-    clusters = subprocess.run(['kind', 'get', 'clusters'], stdout=subprocess.PIPE, check=True)
-    out = clusters.stdout.decode('utf-8').splitlines()
+    clusters = subprocess.run(
+        ['kind', 'get', 'clusters'],
+        stdout=subprocess.PIPE,
+        encoding='utf-8',
+        check=True
+    )
+    out = clusters.stdout.splitlines()
     if 'No kind clusters found' in out or name not in out:
         subprocess.run(['kind', 'create', 'cluster', '--name', name, '--config', kind_yml.as_posix()], check=True)
 
