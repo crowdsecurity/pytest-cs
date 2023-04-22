@@ -1,10 +1,7 @@
 import re
 
+csi_regex = re.compile(r'\x1B\[\d+(;\d+){0,2}m|\x1b\(B\x1B\[m')
+
 
 def nocolor(s):
-    return re.sub(
-        # r'(\x1B[@-Z\\-_]|\x1B\([B\)]|\x1b\[.*?[mGKH])'
-        r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])',
-        '',
-        s
-    )
+    return csi_regex.sub('', s,)
