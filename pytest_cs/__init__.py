@@ -42,6 +42,7 @@ from .deb import (
 from .rpm import (
     rpm_package,
     rpm_package_path,
+    rpm_package_name,
     rpm_package_number,
     rpm_package_version,
     skip_unless_rpm,
@@ -80,6 +81,7 @@ __all__ = [
     "skip_unless_deb",
     "rpm_package",
     "rpm_package_path",
+    "rpm_package_name",
     "rpm_package_number",
     "rpm_package_version",
     "skip_unless_rpm",
