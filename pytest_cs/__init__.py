@@ -37,10 +37,13 @@ from .deb import (
     deb_package_name,
     deb_package_path,
     deb_package_version,
+    skip_unless_deb,
 )
 from .rpm import (
     rpm_package,
     rpm_package_path,
+    rpm_package_version,
+    skip_unless_rpm,
 )
 from .rootcheck import (
     must_be_root,
@@ -73,8 +76,11 @@ __all__ = [
     "deb_package_name",
     "deb_package_path",
     "deb_package_version",
+    "skip_unless_deb",
     "rpm_package",
     "rpm_package_path",
+    "rpm_package_version",
+    "skip_unless_rpm",
     "must_be_root",
     "must_be_nonroot",
 ]
