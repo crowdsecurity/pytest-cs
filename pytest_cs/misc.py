@@ -5,7 +5,7 @@ import pytest
 
 
 def lookup_project_repo():
-    """Return the root of the git repo containing the current directory."""
+    """Return the root of the git repository containing the current directory."""
 
     root = Path.cwd()
     while not (root / '.git').exists():
