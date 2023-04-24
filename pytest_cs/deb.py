@@ -1,9 +1,16 @@
+import os
 import pytest
 import subprocess
 
 from .misc import lookup_project_repo
 
 deb_build_done = False
+
+
+@pytest.fixture
+def skip_unless_deb():
+    if not os.path.exists('/etc/debian_version'):
+        pytest.skip('This test is only for Debian-based systems.')
 
 
 def enum_package_names():

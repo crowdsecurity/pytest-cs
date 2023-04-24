@@ -7,6 +7,12 @@ import pytest
 rpm_build_done = False
 
 
+@pytest.fixture
+def skip_unless_rpm():
+    if not os.path.exists('/etc/redhat-release'):
+        pytest.skip('This test is only for RPM-based systems')
+
+
 def rpmbuild(repodir, bouncer_under_test, version, package_number):
     directory_name = f'{bouncer_under_test}-{version}'
 
