@@ -1,11 +1,45 @@
-# -*- coding: utf-8 -*-
-
+import os
 import pytest
 import secrets
+import subprocess
 import string
 import trustme
 
 keep_kind_cluster = True
+
+
+def systemd_debug(service=None):
+    if service is None:
+        print("No service name provided, can't show journal output")
+        return
+
+    p = subprocess.Popen(
+            ['systemctl', 'status', service],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            encoding='utf-8')
+    stdout, stderr = p.communicate()
+    print(f'--- systemctl status (return code: {p.returncode}) ---')
+    print(stdout)
+
+    p = subprocess.Popen(
+            ['journalctl', '-xeu', service],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            encoding='utf-8')
+    stdout, stderr = p.communicate()
+    print('--- journalctl -xeu (return code: %d) ---' % p.returncode)
+    print(stdout)
+
+
+def pytest_exception_interact(node, call, report):
+    # when a test with the marker "systemd_debug(service)" fails,
+    # we dump the status and journal for the systemd unit, but only when
+    # running in CI. Interactive runs can use --pdb to debug.
+    if report.failed and os.environ.get('CI') == 'true':
+        for m in node.iter_markers():
+            if m.name == 'systemd_debug':
+                systemd_debug(*m.args, **m.kwargs)
 
 
 @pytest.fixture(scope='session')
