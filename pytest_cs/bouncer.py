@@ -59,16 +59,22 @@ class BouncerProc:
 # This won't work with different bouncers in the same test
 # scenario, but it's unlikely that we'll need that
 @pytest.fixture(scope='session')
-def bouncer(bouncer_binary, tmp_path_factory,):
+def bouncer(bouncer_binary, tmp_path_factory):
     @contextlib.contextmanager
-    def closure(config):
+    def closure(config, config_local=None):
         # create joint stout/stderr file
-        outdir = tmp_path_factory.mktemp("output")
-        confpath = outdir / "bouncer-config.yaml"
-        with open(confpath, "w") as f:
+        outdir = tmp_path_factory.mktemp('output')
+
+        confpath = outdir / 'bouncer-config.yaml'
+        with open(confpath, 'w') as f:
             f.write(yaml.dump(config))
-        outpath = outdir / "output.txt"
-        with open(outpath, "w") as f:
+
+        if config_local is not None:
+            with open(confpath.with_suffix('.yaml.local'), 'w') as f:
+                f.write(yaml.dump(config_local))
+
+        outpath = outdir / 'output.txt'
+        with open(outpath, 'w') as f:
             cb = subprocess.Popen(
                     [bouncer_binary, "-c", confpath.as_posix()],
                     stdout=f,
