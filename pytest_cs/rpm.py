@@ -58,7 +58,7 @@ def rpm_package_path(project_repo, rpm_package_version, rpm_package_number, rpm_
 
 
 @pytest.fixture(scope='session')
-def rpm_package(rpm_package_path, project_repo, rpm_package_version, bouncer_under_test):
+def rpm_package(rpm_package_path, project_repo, rpm_package_version, rpm_package_number, bouncer_under_test):
     # Assume that the rpm package names are the same as the deb ones
     global rpm_build_done
     if not rpm_build_done:
