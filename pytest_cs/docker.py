@@ -65,7 +65,7 @@ def docker_client():
 @pytest.fixture(scope='session')
 def crowdsec(docker_client, crowdsec_version, docker_network):
     # return a context manager that will create a container, yield it, and
-    # remove it when the context manager exits
+    # stop it when the context manager exits
     @contextlib.contextmanager
     def closure(*args, **kwargs):
         kw = kwargs.copy()
@@ -103,7 +103,8 @@ def crowdsec(docker_client, crowdsec_version, docker_network):
             cont.stop(timeout=0)
             cont.wait()
             cont.reload()
-            cont.remove(force=True)
+            # we don't remove the container, so that we can inspect it if the test fails
+            # cont.remove(force=True)
     return closure
 
 
@@ -153,7 +154,7 @@ class CrowdsecContainer(Container):
 @pytest.fixture(scope='session')
 def container(docker_client, docker_network):
     # return a context manager that will create a container, yield it, and
-    # remove it when the context manager exits
+    # stop it when the context manager exits
     @contextlib.contextmanager
     def closure(*args, **kwargs):
         kw = kwargs.copy()
@@ -184,7 +185,8 @@ def container(docker_client, docker_network):
             cont.stop(timeout=0)
             cont.wait()
             cont.reload()
-            cont.remove(force=True)
+            # we don't remove the container, so that we can inspect it if the test fails
+            # cont.remove(force=True)
     return closure
 
 
