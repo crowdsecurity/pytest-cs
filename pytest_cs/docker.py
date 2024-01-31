@@ -83,6 +83,7 @@ def crowdsec(docker_client, crowdsec_version, docker_network):
 
         # defaults for all crowdsec tests
         kw['environment'].setdefault('DISABLE_ONLINE_API', 'true')
+        kw['environment'].setdefault('NO_HUB_UPGRADE', 'true')
         kw['environment'].setdefault('CROWDSEC_FEATURE_DISABLE_HTTP_RETRY_BACKOFF', 'true')
 
         # forced
@@ -168,6 +169,7 @@ def container(docker_client, docker_network):
 
         # defaults for all crowdsec tests. We set them for all containers, just in case
         kw['environment'].setdefault('DISABLE_ONLINE_API', 'true')
+        kw['environment'].setdefault('NO_HUB_UPGRADE', 'true')
         kw['environment'].setdefault('CROWDSEC_FEATURE_DISABLE_HTTP_RETRY_BACKOFF', 'true')
 
         # forced
