@@ -30,6 +30,10 @@ jobs:
     - name: Install the project
       run: uv sync --all-extras --dev
 
+    - name: Lint
+      run: |
+        uv run ruff check
+
     - name: Run tests
       run: |
         docker network create net-test
