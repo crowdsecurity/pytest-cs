@@ -1,0 +1,33 @@
+[project]
+name = "pytest_cs"
+version = "0.7.18"
+license = "MIT"
+description = "Pytest fixtures for crowdsec"
+readme = "README.md"
+authors = [
+    { email = "marco@crowdsec.net" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "docker>=7.1.0",
+    "psutil>=6.1.1",
+    "pytest>=8.3.4",
+    "pytest-datadir>=1.5.0",
+    "pytest-dotenv>=0.5.2",
+    "pyyaml>=6.0.2",
+    "requests>=2.32.3",
+    "trustme>=1.2.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.14.1",
+    "ruff>=0.9.3",
+]
+
+[project.entry-points.'pytest11']
+cs = "pytest_cs"
