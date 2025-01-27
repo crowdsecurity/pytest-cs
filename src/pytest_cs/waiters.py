@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
+import time
 
 from _pytest.outcomes import Failed
-
-import time
 
 from .helpers import get_timeout
 

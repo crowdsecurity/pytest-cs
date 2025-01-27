@@ -1,8 +1,9 @@
 import os
-import pytest
 import secrets
-import subprocess
 import string
+import subprocess
+
+import pytest
 import trustme
 
 keep_kind_cluster = True
@@ -18,7 +19,7 @@ def systemd_debug(service=None):
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding='utf-8')
-    stdout, stderr = p.communicate()
+    stdout, _stderr = p.communicate()
     print(f'--- systemctl status (return code: {p.returncode}) ---')
     print(stdout)
 
@@ -27,12 +28,12 @@ def systemd_debug(service=None):
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding='utf-8')
-    stdout, stderr = p.communicate()
-    print('--- journalctl -xeu (return code: %d) ---' % p.returncode)
+    stdout, _stderr = p.communicate()
+    print(f'--- journalctl -xeu (return code: {p.returncode}) ---')
     print(stdout)
 
 
-def pytest_exception_interact(node, call, report):
+def pytest_exception_interact(node, _call, report):
     # when a test with the marker "systemd_debug(service)" fails,
     # we dump the status and journal for the systemd unit, but only when
     # running in CI. Interactive runs can use --pdb to debug.
@@ -69,5 +70,5 @@ def certs_dir(tmp_path_factory):
 @pytest.fixture(scope='session')
 def api_key_factory():
     def closure(alphabet=string.ascii_letters + string.digits):
-        return ''.join(secrets.choice(alphabet) for i in range(32))
+        return ''.join(secrets.choice(alphabet) for _ in range(32))
     yield closure
