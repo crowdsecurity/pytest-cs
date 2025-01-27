@@ -1,14 +1,11 @@
-# -*- coding: utf-8 -*-
-
 import contextlib
 import os
+import time
 
 import docker
 import docker.errors
 import pytest
 import requests
-
-import time
 
 from .helpers import get_timeout
 from .waiters import WaiterGenerator

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import contextlib
 import subprocess
 import textwrap
@@ -51,9 +49,8 @@ def kind(tmp_path_factory):
     try:
         yield
     finally:
-        if keep_kind_cluster:
-            return
-        subprocess.run(['kind', 'delete', 'cluster', '--name', name], check=True)
+        if not keep_kind_cluster:
+            subprocess.run(['kind', 'delete', 'cluster', '--name', name], check=True)
 
 
 @pytest.fixture(scope='session')

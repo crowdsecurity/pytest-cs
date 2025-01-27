@@ -6,4 +6,4 @@ def get_timeout(default=20):
     try:
         return int(t)
     except (ValueError, TypeError):
-        raise Exception(f"Invalid CROWDSEC_TEST_TIMEOUT ({t}): must be an integer")
+        raise Exception(f"Invalid CROWDSEC_TEST_TIMEOUT ({t}): must be an integer") from None
