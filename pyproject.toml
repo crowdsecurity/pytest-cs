@@ -1,6 +1,6 @@
 [project]
 name = "pytest_cs"
-version = "0.7.18"
+version = "0.7.20"
 license = "MIT"
 description = "Pytest fixtures for crowdsec"
 readme = "README.md"
