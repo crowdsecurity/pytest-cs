@@ -2,7 +2,7 @@ import json
 import subprocess
 
 
-def get_bouncers(**kw):
+def get_bouncers(**kw: dict[str, str]):
     """
     lookup bouncers by key=value
     """

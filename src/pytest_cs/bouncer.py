@@ -1,5 +1,6 @@
 import contextlib
 import os
+import pathlib
 import subprocess
 import time
 
@@ -23,14 +24,14 @@ class ProcessWaiterGenerator(WaiterGenerator):
 
 
 class BouncerProc:
-    def __init__(self, popen, outpath):
+    def __init__(self, popen, outpath: pathlib.Path):
         self.popen = popen
         self.proc = psutil.Process(popen.pid)
         self.outpath = outpath
 
     # wait for at least one child process to spawn
     # TODO: add a name to look for?
-    def wait_for_child(self, timeout=CHILD_SPAWN_TIMEOUT):
+    def wait_for_child(self, timeout: int = CHILD_SPAWN_TIMEOUT):
         start = time.monotonic()
         while time.monotonic() - start < timeout:
             children = self.proc.children()
@@ -39,7 +40,7 @@ class BouncerProc:
             time.sleep(0.1)
         raise TimeoutError("No child process found")
 
-    def halt_children(self):
+    def halt_children(self) -> None:
         for child in self.proc.children():
             child.kill()
 
@@ -49,8 +50,8 @@ class BouncerProc:
     def get_output(self):
         return pytest.LineMatcher(self.outpath.read_text().splitlines())
 
-    def wait_for_lines_fnmatch(proc, s, timeout=5):
-        for waiter in ProcessWaiterGenerator(proc):
+    def wait_for_lines_fnmatch(self, s, timeout=5):
+        for waiter in ProcessWaiterGenerator(self):
             with waiter as p:
                 p.get_output().fnmatch_lines(s)
 
@@ -59,7 +60,7 @@ class BouncerProc:
 # This won't work with different bouncers in the same test
 # scenario, but it's unlikely that we'll need that
 @pytest.fixture(scope='session')
-def bouncer(bouncer_binary, tmp_path_factory):
+def bouncer(bouncer_binary, tmp_path_factory: pytest.TempPathFactory):
     @contextlib.contextmanager
     def closure(config, config_local=None):
         # create joint stout/stderr file
@@ -67,11 +68,11 @@ def bouncer(bouncer_binary, tmp_path_factory):
 
         confpath = outdir / 'bouncer-config.yaml'
         with open(confpath, 'w') as f:
-            f.write(yaml.dump(config))
+            _ = f.write(yaml.dump(config))
 
         if config_local is not None:
             with open(confpath.with_suffix('.yaml.local'), 'w') as f:
-                f.write(yaml.dump(config_local))
+                _ = f.write(yaml.dump(config_local))
 
         outpath = outdir / 'output.txt'
         with open(outpath, 'w') as f:
@@ -84,7 +85,7 @@ def bouncer(bouncer_binary, tmp_path_factory):
             yield BouncerProc(cb, outpath)
         finally:
             cb.kill()
-            cb.wait()
+            _ = cb.wait()
     yield closure
 
 
