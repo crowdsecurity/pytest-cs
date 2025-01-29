@@ -24,7 +24,7 @@ class ProcessWaiterGenerator(WaiterGenerator):
 
 
 class BouncerProc:
-    def __init__(self, popen, outpath: pathlib.Path):
+    def __init__(self, popen: subprocess.Popen[str], outpath: pathlib.Path):
         self.popen = popen
         self.proc = psutil.Process(popen.pid)
         self.outpath = outpath
@@ -59,38 +59,41 @@ class BouncerProc:
 # The bouncer to use is provided by the fixture bouncer_under_test.
 # This won't work with different bouncers in the same test
 # scenario, but it's unlikely that we'll need that
-@pytest.fixture(scope='session')
-def bouncer(bouncer_binary, tmp_path_factory: pytest.TempPathFactory):
+@pytest.fixture(scope="session")
+def bouncer(bouncer_binary: str, tmp_path_factory: pytest.TempPathFactory):
     @contextlib.contextmanager
     def closure(config, config_local=None):
         # create joint stout/stderr file
-        outdir = tmp_path_factory.mktemp('output')
+        outdir = tmp_path_factory.mktemp("output")
 
-        confpath = outdir / 'bouncer-config.yaml'
-        with open(confpath, 'w') as f:
+        confpath = outdir / "bouncer-config.yaml"
+        with open(confpath, "w") as f:
             _ = f.write(yaml.dump(config))
 
         if config_local is not None:
-            with open(confpath.with_suffix('.yaml.local'), 'w') as f:
+            with open(confpath.with_suffix(".yaml.local"), "w") as f:
                 _ = f.write(yaml.dump(config_local))
 
-        outpath = outdir / 'output.txt'
-        with open(outpath, 'w') as f:
-            cb = subprocess.Popen(
-                    [bouncer_binary, "-c", confpath.as_posix()],
-                    stdout=f,
-                    stderr=subprocess.STDOUT,
-                    )
+        outpath = outdir / "output.txt"
+        with open(outpath, "w") as f:
+            cb = subprocess.Popen[str](
+                [bouncer_binary, "-c", confpath.as_posix()],
+                stdout=f,
+                stderr=subprocess.STDOUT,
+                text=True,
+                encoding="utf-8",
+            )
         try:
             yield BouncerProc(cb, outpath)
         finally:
             cb.kill()
             _ = cb.wait()
+
     yield closure
 
 
-@pytest.fixture(scope='session')
-def bouncer_binary(project_repo, bouncer_under_test):
+@pytest.fixture(scope="session")
+def bouncer_binary(project_repo: pathlib.Path, bouncer_under_test: str):
     binary_path = project_repo / bouncer_under_test
     if not binary_path.exists() or not os.access(binary_path, os.X_OK):
         raise RuntimeError(f"Bouncer binary not found at {binary_path}. Did you build it?")

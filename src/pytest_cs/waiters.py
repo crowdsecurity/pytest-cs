@@ -16,13 +16,13 @@ from .helpers import get_timeout
 #       assert ctx.some_other_condition()
 #       assert ctx.yet_another_condition()
 class WaiterGenerator:
-    def __init__(self, timeout=get_timeout(), step=.1):
+    def __init__(self, timeout=get_timeout(), step=0.1):
         self.start = time.monotonic()
         self.timeout = timeout
-        self.step = step        # wait between iterations
-        self.done = False       # set to True to stop the iteration
-        self.failure = None     # capture an exception to raise on the last iteration
-        self.iteration = 0      # for debugging
+        self.step = step  # wait between iterations
+        self.done = False  # set to True to stop the iteration
+        self.failure = None  # capture an exception to raise on the last iteration
+        self.iteration = 0  # for debugging
 
     # Yield a context manager until the timeout is reached.
     #
@@ -44,8 +44,7 @@ class WaiterGenerator:
             self.iteration += 1
 
             # until the last iteration, we ignore test failures
-            if (self.failure and not isinstance(self.failure, AssertionError)
-                    and not isinstance(self.failure, Failed)):
+            if self.failure and not isinstance(self.failure, AssertionError) and not isinstance(self.failure, Failed):
                 raise self.failure
 
         if self.done:
