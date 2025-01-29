@@ -1,4 +1,5 @@
 import contextlib
+import pathlib
 import subprocess
 import textwrap
 
@@ -55,7 +56,7 @@ def helm(kind):
     # return a context manager that will create a release, yield its name, and
     # remove it when the context manager exits
     @contextlib.contextmanager
-    def closure(namespace, chart, values=None):
+    def closure(namespace: str, chart: str, values: pathlib.Path | None = None):
         release = f"test-{namespace}"
         cmd = ["helm", "install", "--create-namespace", release, chart, "--namespace", namespace]
         if values:

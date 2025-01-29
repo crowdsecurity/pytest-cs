@@ -1,7 +1,7 @@
 import os
 
 
-def get_timeout(default=20):
+def get_timeout(default: int = 20):
     t = os.getenv("CROWDSEC_TEST_TIMEOUT", default)
     try:
         return int(t)

@@ -2,9 +2,12 @@ import os
 import secrets
 import string
 import subprocess
+import typing
 
 import pytest
 import trustme
+from _pytest.nodes import Node
+from _pytest.reports import BaseReport
 
 keep_kind_cluster = True
 
@@ -29,7 +32,7 @@ def systemd_debug(service: str | None = None):
     print(stdout)
 
 
-def pytest_exception_interact(node, _call, report):
+def pytest_exception_interact(node: Node, _call: pytest.CallInfo[typing.Any], report: BaseReport):
     # when a test with the marker "systemd_debug(service)" fails,
     # we dump the status and journal for the systemd unit, but only when
     # running in CI. Interactive runs can use --pdb to debug.
@@ -41,7 +44,7 @@ def pytest_exception_interact(node, _call, report):
 
 @pytest.fixture(scope="session")
 def certs_dir(tmp_path_factory: pytest.TempPathFactory):
-    def closure(lapi_hostname, agent_ou="agent-ou", bouncer_ou="bouncer-ou"):
+    def closure(lapi_hostname: str, agent_ou: str = "agent-ou", bouncer_ou: str = "bouncer-ou"):
         path = tmp_path_factory.mktemp("certs")
 
         ca = trustme.CA()
@@ -66,7 +69,7 @@ def certs_dir(tmp_path_factory: pytest.TempPathFactory):
 
 @pytest.fixture(scope="session")
 def api_key_factory():
-    def closure(alphabet=string.ascii_letters + string.digits):
+    def closure(alphabet: str = string.ascii_letters + string.digits):
         return "".join(secrets.choice(alphabet) for _ in range(32))
 
     yield closure

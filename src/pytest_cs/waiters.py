@@ -1,4 +1,5 @@
 import time
+from types import TracebackType
 
 from _pytest.outcomes import Failed
 
@@ -16,7 +17,7 @@ from .helpers import get_timeout
 #       assert ctx.some_other_condition()
 #       assert ctx.yet_another_condition()
 class WaiterGenerator:
-    def __init__(self, timeout=get_timeout(), step=0.1):
+    def __init__(self, timeout: int = get_timeout(), step: float = 0.1):
         self.start = time.monotonic()
         self.timeout = timeout
         self.step = step  # wait between iterations
@@ -74,7 +75,7 @@ class WaiterGenerator:
     # otherwise, we capture the exception
     # we always return True to prevent the exception from propagating
     # (we'll raise it on the last iteration)
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> bool:
         if exc_type is None:
             self.done = True
         else:

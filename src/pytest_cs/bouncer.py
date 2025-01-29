@@ -15,7 +15,7 @@ CHILD_SPAWN_TIMEOUT = 2
 
 
 class ProcessWaiterGenerator(WaiterGenerator):
-    def __init__(self, proc):
+    def __init__(self, proc: "BouncerProc"):
         self.proc = proc
         super().__init__()
 
@@ -50,7 +50,7 @@ class BouncerProc:
     def get_output(self):
         return pytest.LineMatcher(self.outpath.read_text().splitlines())
 
-    def wait_for_lines_fnmatch(self, s, timeout=5):
+    def wait_for_lines_fnmatch(self, s: list[str], timeout=5):
         for waiter in ProcessWaiterGenerator(self):
             with waiter as p:
                 p.get_output().fnmatch_lines(s)

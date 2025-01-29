@@ -4,6 +4,7 @@ import time
 
 import docker
 import docker.errors
+import docker.models.containers
 import pytest
 import requests
 
@@ -29,13 +30,15 @@ def crowdsec_flavors():
 
 
 @pytest.fixture(scope="session", params=crowdsec_flavors())
-def flavor(request):
+def flavor(request: pytest.FixtureRequest):
     return request.param
 
 
 # Create a container. If the image was not found, pull it
 # and try again
-def pull_and_create_container(docker_client, *args, **kwargs):
+def pull_and_create_container(
+    docker_client: docker.DockerClient, *args, **kwargs
+) -> docker.models.containers.Container:
     try:
         return docker_client.containers.create(*args, **kwargs)
     except docker.errors.ImageNotFound:
@@ -48,7 +51,7 @@ def pull_and_create_container(docker_client, *args, **kwargs):
         return docker_client.containers.create(*args, **kwargs)
 
 
-def get_image(version, flavor):
+def get_image(version: str, flavor: str):
     if flavor == "full":
         return f"crowdsecurity/crowdsec:{version}"
     return f"crowdsecurity/crowdsec:{version}-{flavor}"
@@ -60,7 +63,7 @@ def docker_client():
 
 
 @pytest.fixture(scope="session")
-def crowdsec(docker_client, crowdsec_version, docker_network):
+def crowdsec(docker_client: docker.DockerClient, crowdsec_version: str, docker_network: str):
     # return a context manager that will create a container, yield it, and
     # stop it when the context manager exits
     @contextlib.contextmanager
@@ -108,7 +111,7 @@ def crowdsec(docker_client, crowdsec_version, docker_network):
 
 
 class Container:
-    def __init__(self, cont):
+    def __init__(self, cont: docker.models.containers.Container):
         self.cont = cont
 
     def log_waiters(self, *args, **kw):
@@ -151,7 +154,7 @@ class CrowdsecContainer(Container):
 
 
 @pytest.fixture(scope="session")
-def container(docker_client, docker_network):
+def container(docker_client: docker.DockerClient, docker_network: str):
     # return a context manager that will create a container, yield it, and
     # stop it when the context manager exits
     @contextlib.contextmanager

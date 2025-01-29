@@ -1,4 +1,5 @@
 import os
+import pathlib
 import shutil
 import subprocess
 
@@ -13,7 +14,7 @@ def skip_unless_rpm():
         pytest.skip("This test is only for RPM-based systems")
 
 
-def rpmbuild(repodir, bouncer_under_test, version, package_number):
+def rpmbuild(repodir: pathlib.Path, bouncer_under_test: str, version: str, package_number: str):
     directory_name = f"{bouncer_under_test}-{version}"
 
     # git clone repo from PROJECT_ROOT to rpm/SOURCES
@@ -39,7 +40,7 @@ def rpmbuild(repodir, bouncer_under_test, version, package_number):
 
 
 @pytest.fixture(scope="session")
-def rpm_package_name(deb_package_name):
+def rpm_package_name(deb_package_name: str):
     yield deb_package_name
 
 
@@ -54,14 +55,26 @@ def rpm_package_number():
 
 
 @pytest.fixture(scope="session")
-def rpm_package_path(project_repo, rpm_package_version, rpm_package_number, rpm_package_name, bouncer_under_test):
+def rpm_package_path(
+    project_repo: pathlib.Path,
+    rpm_package_version: str,
+    rpm_package_number: str,
+    rpm_package_name: str,
+    bouncer_under_test: str,
+):
     distversion, arch = subprocess.check_output(["uname", "-r"]).rstrip().decode().split(".")[-2:]
     filename = f"{rpm_package_name}-{rpm_package_version}-{rpm_package_number}.{distversion}.{arch}.rpm"
     yield project_repo / "rpm/RPMS" / arch / filename
 
 
 @pytest.fixture(scope="session")
-def rpm_package(rpm_package_path, project_repo, rpm_package_version, rpm_package_number, bouncer_under_test):
+def rpm_package(
+    rpm_package_path: pathlib.Path,
+    project_repo: pathlib.Path,
+    rpm_package_version: str,
+    rpm_package_number: str,
+    bouncer_under_test: str,
+):
     # Assume that the rpm package names are the same as the deb ones
     global rpm_build_done
     if not rpm_build_done:

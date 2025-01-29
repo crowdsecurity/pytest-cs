@@ -1,5 +1,6 @@
 import contextlib
 import json
+import pathlib
 import subprocess
 
 import pytest
@@ -7,7 +8,7 @@ import pytest
 
 # run a Compose v2 project by calling the "docker compose" command
 class ComposeProject:
-    def __init__(self, compose_file):
+    def __init__(self, compose_file: pathlib.Path):
         self.compose_file = compose_file
         self.cmd = ["docker", "compose", "-f", compose_file.as_posix()]
 
@@ -29,7 +30,7 @@ class ComposeProject:
 @pytest.fixture(scope="session")
 def compose():
     @contextlib.contextmanager
-    def closure(compose_file):
+    def closure(compose_file: pathlib.Path):
         project = ComposeProject(compose_file)
         project.up()
         try:
