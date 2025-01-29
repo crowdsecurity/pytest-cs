@@ -1,5 +1,6 @@
 import time
 from types import TracebackType
+from typing import Final
 
 from _pytest.outcomes import Failed
 
@@ -18,12 +19,12 @@ from .helpers import get_timeout
 #       assert ctx.yet_another_condition()
 class WaiterGenerator:
     def __init__(self, timeout: int = get_timeout(), step: float = 0.1):
-        self.start = time.monotonic()
-        self.timeout = timeout
-        self.step = step  # wait between iterations
-        self.done = False  # set to True to stop the iteration
-        self.failure = None  # capture an exception to raise on the last iteration
-        self.iteration = 0  # for debugging
+        self.start: Final = time.monotonic()
+        self.timeout: float = timeout
+        self.step: Final = step  # wait between iterations
+        self.done: bool = False  # set to True to stop the iteration
+        self.failure: BaseException | None = None  # capture an exception to raise on the last iteration
+        self.iteration: int = 0  # for debugging
 
     # Yield a context manager until the timeout is reached.
     #
@@ -75,7 +76,9 @@ class WaiterGenerator:
     # otherwise, we capture the exception
     # we always return True to prevent the exception from propagating
     # (we'll raise it on the last iteration)
-    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> bool:
+    def __exit__(
+        self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None
+    ) -> bool:
         if exc_type is None:
             self.done = True
         else:

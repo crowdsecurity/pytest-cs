@@ -3,6 +3,7 @@ import os
 import pathlib
 import subprocess
 import time
+from typing import Final
 
 import psutil
 import pytest
@@ -16,7 +17,7 @@ CHILD_SPAWN_TIMEOUT = 2
 
 class ProcessWaiterGenerator(WaiterGenerator):
     def __init__(self, proc: "BouncerProc"):
-        self.proc = proc
+        self.proc: Final = proc
         super().__init__()
 
     def context(self):
@@ -25,9 +26,9 @@ class ProcessWaiterGenerator(WaiterGenerator):
 
 class BouncerProc:
     def __init__(self, popen: subprocess.Popen[str], outpath: pathlib.Path):
-        self.popen = popen
-        self.proc = psutil.Process(popen.pid)
-        self.outpath = outpath
+        self.popen: Final = popen
+        self.proc: Final = psutil.Process(popen.pid)
+        self.outpath: Final = outpath
 
     # wait for at least one child process to spawn
     # TODO: add a name to look for?

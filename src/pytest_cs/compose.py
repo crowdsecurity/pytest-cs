@@ -2,6 +2,7 @@ import contextlib
 import json
 import pathlib
 import subprocess
+from typing import Final
 
 import pytest
 
@@ -9,8 +10,8 @@ import pytest
 # run a Compose v2 project by calling the "docker compose" command
 class ComposeProject:
     def __init__(self, compose_file: pathlib.Path):
-        self.compose_file = compose_file
-        self.cmd = ["docker", "compose", "-f", compose_file.as_posix()]
+        self.compose_file: Final = compose_file
+        self.cmd: Final = ["docker", "compose", "-f", compose_file.as_posix()]
 
     def up(self):
         cmd = self.cmd + ["up", "-d"]

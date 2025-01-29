@@ -1,6 +1,8 @@
 import contextlib
 import os
 import time
+from collections.abc import Callable, Iterator
+from typing import Final
 
 import docker
 import docker.errors
@@ -34,6 +36,49 @@ def flavor(request: pytest.FixtureRequest):
     return request.param
 
 
+class Container:
+    def __init__(self, cont: docker.models.containers.Container):
+        self.cont: Final = cont
+
+    def log_waiters(self, *args, **kw):
+        return log_waiters(self.cont, *args, **kw)
+
+    def port_waiters(self, *args, **kw):
+        return port_waiters(self.cont, *args, **kw)
+
+    def wait_for_log(self, s, timeout=get_timeout()):
+        if isinstance(s, str):
+            s = [s]
+        for waiter in log_waiters(self.cont, timeout):
+            with waiter as matcher:
+                matcher.fnmatch_lines(s)
+
+    def wait_for_http(self, port, path, want_status=None, timeout=get_timeout()):
+        for waiter in port_waiters(self.cont, timeout):
+            with waiter as probe:
+                status = probe.http_status_code(port, path)
+                # the iteration is invalidated if it raises an exception (i.e. the check will be retried)
+                assert status is not None
+                # wait for a specific status code - this could be behind a proxy/load balancer
+                # status_code=None if we don't care about it
+                if want_status is not None:
+                    assert status == want_status
+                return status
+
+    # Return the last 'tail' lines of the container's logs (either a number or the string 'all')
+    # The default is a measure to avoid performance or memory issues.
+    def log_lines(self, tail=10000):
+        return self.cont.logs(tail=tail).decode("utf-8").splitlines()
+
+    @property
+    def probe(self):
+        return Probe(self.cont.ports)
+
+
+class CrowdsecContainer(Container):
+    pass
+
+
 # Create a container. If the image was not found, pull it
 # and try again
 def pull_and_create_container(
@@ -63,11 +108,13 @@ def docker_client():
 
 
 @pytest.fixture(scope="session")
-def crowdsec(docker_client: docker.DockerClient, crowdsec_version: str, docker_network: str):
+def crowdsec(
+    docker_client: docker.DockerClient, crowdsec_version: str, docker_network: str
+) -> Callable[..., contextlib.AbstractContextManager[CrowdsecContainer]]:
     # return a context manager that will create a container, yield it, and
     # stop it when the context manager exits
     @contextlib.contextmanager
-    def closure(*args, **kwargs):
+    def closure(*args, **kwargs) -> Iterator[CrowdsecContainer]:
         kw = kwargs.copy()
 
         wait_status = kw.pop("wait_status", Status.RUNNING)
@@ -110,55 +157,14 @@ def crowdsec(docker_client: docker.DockerClient, crowdsec_version: str, docker_n
     return closure
 
 
-class Container:
-    def __init__(self, cont: docker.models.containers.Container):
-        self.cont = cont
-
-    def log_waiters(self, *args, **kw):
-        return log_waiters(self.cont, *args, **kw)
-
-    def port_waiters(self, *args, **kw):
-        return port_waiters(self.cont, *args, **kw)
-
-    def wait_for_log(self, s, timeout=get_timeout()):
-        if isinstance(s, str):
-            s = [s]
-        for waiter in log_waiters(self.cont, timeout):
-            with waiter as matcher:
-                matcher.fnmatch_lines(s)
-
-    def wait_for_http(self, port, path, want_status=None, timeout=get_timeout()):
-        for waiter in port_waiters(self.cont, timeout):
-            with waiter as probe:
-                status = probe.http_status_code(port, path)
-                # the iteration is invalidated if it raises an exception (i.e. the check will be retried)
-                assert status is not None
-                # wait for a specific status code - this could be behind a proxy/load balancer
-                # status_code=None if we don't care about it
-                if want_status is not None:
-                    assert status == want_status
-                return status
-
-    # Return the last 'tail' lines of the container's logs (either a number or the string 'all')
-    # The default is a measure to avoid performance or memory issues.
-    def log_lines(self, tail=10000):
-        return self.cont.logs(tail=tail).decode("utf-8").splitlines()
-
-    @property
-    def probe(self):
-        return Probe(self.cont.ports)
-
-
-class CrowdsecContainer(Container):
-    pass
-
-
 @pytest.fixture(scope="session")
-def container(docker_client: docker.DockerClient, docker_network: str):
+def container(
+    docker_client: docker.DockerClient, docker_network: str
+) -> Callable[..., contextlib.AbstractContextManager[Container]]:
     # return a context manager that will create a container, yield it, and
     # stop it when the context manager exits
     @contextlib.contextmanager
-    def closure(*args, **kwargs):
+    def closure(*args, **kwargs) -> Iterator[Container]:
         kw = kwargs.copy()
 
         wait_status = kw.pop("wait_status", Status.RUNNING)
@@ -195,9 +201,9 @@ def container(docker_client: docker.DockerClient, docker_network: str):
 
 
 class ContainerWaiterGenerator(WaiterGenerator):
-    def __init__(self, cont, timeout=get_timeout()):
+    def __init__(self, cont: docker.models.containers.Container, timeout=get_timeout()):
         super().__init__(timeout)
-        self.cont = cont
+        self.cont: Final = cont
 
     def refresh(self):
         self.cont.reload()
@@ -206,7 +212,7 @@ class ContainerWaiterGenerator(WaiterGenerator):
 
 class Probe:
     def __init__(self, ports):
-        self.ports = ports
+        self.ports: Final = ports
 
     def get_bound_port(self, port):
         full_port = f"{port}/tcp"
@@ -233,7 +239,7 @@ class port_waiters(ContainerWaiterGenerator):
         return Probe(self.cont.ports)
 
 
-def wait_for_status(cont, status, timeout=get_timeout()):
+def wait_for_status(cont: docker.models.containers.Container, status, timeout=get_timeout()):
     start = time.monotonic()
     now = start
     while (now - start) < timeout:
@@ -252,10 +258,10 @@ class log_waiters(ContainerWaiterGenerator):
 
 
 class Status:
-    CREATED = "created"
-    RUNNING = "running"
-    PAUSED = "paused"
-    RESTARTING = "restarting"
-    EXITED = "exited"
-    DEAD = "dead"
-    REMOVING = "removing"
+    CREATED: Final = "created"
+    RUNNING: Final = "running"
+    PAUSED: Final = "paused"
+    RESTARTING: Final = "restarting"
+    EXITED: Final = "exited"
+    DEAD: Final = "dead"
+    REMOVING: Final = "removing"
