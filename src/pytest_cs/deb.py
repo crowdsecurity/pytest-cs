@@ -18,7 +18,7 @@ def skip_unless_deb():
 def enum_package_names():
     repo = lookup_project_repo()
     try:
-        with open(repo / "debian/control") as f:
+        with (repo / "debian/control").open() as f:
             for line in f:
                 if line.startswith("Package:"):
                     yield line.split()[1]
@@ -48,7 +48,7 @@ def dpkg_buildpackage(repodir: pathlib.Path):
 
 @pytest.fixture(scope="session")
 def deb_package_path(
-    deb_package_name: str, deb_package_version: str, deb_package_arch: str, project_repo: pathlib.Path
+    deb_package_name: str, deb_package_version: str, deb_package_arch: str, project_repo: pathlib.Path,
 ):
     yield project_repo.parent / f"{deb_package_name}_{deb_package_version}_{deb_package_arch}.deb"
 

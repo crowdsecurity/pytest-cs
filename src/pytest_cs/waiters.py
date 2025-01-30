@@ -77,7 +77,7 @@ class WaiterGenerator:
     # we always return True to prevent the exception from propagating
     # (we'll raise it on the last iteration)
     def __exit__(
-        self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None
+        self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None,
     ) -> bool:
         if exc_type is None:
             self.done = True

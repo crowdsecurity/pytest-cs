@@ -6,7 +6,6 @@ import pytest
 
 def lookup_project_repo():
     """Return the root of the git repository containing the current directory."""
-
     root = pathlib.Path.cwd()
     while not (root / ".git").exists():
         root = root.parent

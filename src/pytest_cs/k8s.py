@@ -36,7 +36,7 @@ def kind(tmp_path_factory: pytest.TempPathFactory):
             hostPort: 443
             protocol: TCP
         - role: worker
-    """)
+    """),
     )
 
     clusters = subprocess.run(["kind", "get", "clusters"], stdout=subprocess.PIPE, encoding="utf-8", check=True)

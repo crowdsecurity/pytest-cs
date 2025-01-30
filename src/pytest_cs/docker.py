@@ -15,16 +15,16 @@ from .waiters import WaiterGenerator
 
 
 @pytest.fixture(scope="session")
-def crowdsec_version():
+def crowdsec_version() -> str:
     return os.environ["CROWDSEC_TEST_VERSION"]
 
 
 @pytest.fixture(scope="session")
-def docker_network():
+def docker_network() -> str:
     return os.environ["CROWDSEC_TEST_NETWORK"]
 
 
-def crowdsec_flavors():
+def crowdsec_flavors() -> list[str]:
     try:
         return os.environ["CROWDSEC_TEST_FLAVORS"].split(",")
     except KeyError:
@@ -32,7 +32,7 @@ def crowdsec_flavors():
 
 
 @pytest.fixture(scope="session", params=crowdsec_flavors())
-def flavor(request: pytest.FixtureRequest):
+def flavor(request: pytest.FixtureRequest) -> str:
     return request.param
 
 
@@ -82,7 +82,7 @@ class CrowdsecContainer(Container):
 # Create a container. If the image was not found, pull it
 # and try again
 def pull_and_create_container(
-    docker_client: docker.DockerClient, *args, **kwargs
+    docker_client: docker.DockerClient, *args, **kwargs,
 ) -> docker.models.containers.Container:
     try:
         return docker_client.containers.create(*args, **kwargs)
@@ -109,7 +109,7 @@ def docker_client():
 
 @pytest.fixture(scope="session")
 def crowdsec(
-    docker_client: docker.DockerClient, crowdsec_version: str, docker_network: str
+    docker_client: docker.DockerClient, crowdsec_version: str, docker_network: str,
 ) -> Callable[..., contextlib.AbstractContextManager[CrowdsecContainer]]:
     # return a context manager that will create a container, yield it, and
     # stop it when the context manager exits
@@ -159,7 +159,7 @@ def crowdsec(
 
 @pytest.fixture(scope="session")
 def container(
-    docker_client: docker.DockerClient, docker_network: str
+    docker_client: docker.DockerClient, docker_network: str,
 ) -> Callable[..., contextlib.AbstractContextManager[Container]]:
     # return a context manager that will create a container, yield it, and
     # stop it when the context manager exits

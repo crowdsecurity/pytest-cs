@@ -14,18 +14,17 @@ class ComposeProject:
         self.cmd: Final = ["docker", "compose", "-f", compose_file.as_posix()]
 
     def up(self):
-        cmd = self.cmd + ["up", "-d"]
+        cmd = [*self.cmd, "up", "-d"]
         subprocess.run(cmd, check=True)
 
     def down(self):
-        cmd = self.cmd + ["down"]
+        cmd = [*self.cmd, "down"]
         subprocess.run(cmd, check=True)
 
     def ps(self):
-        cmd = self.cmd + ["ps", "--format", "json"]
+        cmd = [*self.cmd, "ps", "--format", "json"]
         p = subprocess.run(cmd, check=True, stdout=subprocess.PIPE)
-        j = json.loads(p.stdout)
-        return j
+        return json.loads(p.stdout)
 
 
 @pytest.fixture(scope="session")
