@@ -10,7 +10,7 @@ rpm_build_done = False
 
 @pytest.fixture
 def skip_unless_rpm():
-    if not os.path.exists("/etc/redhat-release"):
+    if not pathlib.Path("/etc/redhat-release").exists():
         pytest.skip("This test is only for RPM-based systems")
 
 
@@ -40,18 +40,18 @@ def rpmbuild(repodir: pathlib.Path, bouncer_under_test: str, version: str, packa
 
 
 @pytest.fixture(scope="session")
-def rpm_package_name(deb_package_name: str):
-    yield deb_package_name
+def rpm_package_name(deb_package_name: str) -> str:
+    return deb_package_name
 
 
 @pytest.fixture(scope="session")
-def rpm_package_version():
-    yield "1.0"
+def rpm_package_version() -> str:
+    return "1.0"
 
 
 @pytest.fixture(scope="session")
-def rpm_package_number():
-    yield "1"
+def rpm_package_number() -> str:
+    return "1"
 
 
 @pytest.fixture(scope="session")
@@ -64,7 +64,7 @@ def rpm_package_path(
 ):
     distversion, arch = subprocess.check_output(["uname", "-r"]).rstrip().decode().split(".")[-2:]
     filename = f"{rpm_package_name}-{rpm_package_version}-{rpm_package_number}.{distversion}.{arch}.rpm"
-    yield project_repo / "rpm/RPMS" / arch / filename
+    return project_repo / "rpm/RPMS" / arch / filename
 
 
 @pytest.fixture(scope="session")
@@ -89,4 +89,4 @@ def rpm_package(
         )
         rpm_build_done = True
 
-    yield rpm_package_path
+    return rpm_package_path

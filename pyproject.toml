@@ -46,8 +46,10 @@ select = [
 ]
 
 ignore = [
+    "ANN",      # Missing type annotations
+    "ARG001",   # Unused function argument: `...`
     "B008",     # Do not perform function calls in argument defaults
-    "S101",     # Use of 'assert' detected
+    "COM812",   # Trailing comma missing
     "D100",     # Missing docstring in public module
     "D101",     # Missing docstring in public class
     "D102",     # Missing docstring in public method
@@ -57,20 +59,28 @@ ignore = [
     "D107",     # Missing docstring in __init__
     "D203",     # incorrect-blank-line-before-class
     "D213",     # multi-line-summary-second-line
+    "EM101",    # Exception must not use a string literal, assign to variable first
+    "EM102",    # Exception must not use an f-string literal, assign to variable first
     "ERA001",   # Found commented-out code
-    "W391",     # Black line at end of file
+    "FIX002",   # Line contains TODO, consider resolving the issue
     "FIX003",   # Line contains XXX, consider resolving the issue
+    "N801",     # Class name `log_waiters` should use CapWords convention
+    "PLW0603",  # Using the global statement to update `...` is discouraged
+    "RET503",   # Missing explicit `return` at the end of function able to return non-`None` value
+    "S101",     # Use of 'assert' detected
+    "S113",     # Probable use of `requests` call without timeout
+    "S603",     # `subprocess` call: check for execution of untrusted input
+    "S607",     # Starting a process with a partial executable path
+    "SIM105",   # Use `contextlib.suppress(FileNotFoundError)` instead of `try`-`except`-`pass`
+    "T201",     # `print` found
     "TD001",    # Invalid TODO tag: `XXX`
     "TD002",    # Missing author in TODO
     "TD003",    # Missing issue link for this TODO
     "TD004",    # Missing colon in TODO
-
-    "ANN",      # Missing type annotations
-    "COM812",   # Trailing comma missing
-
-    "PT022", "PLW0603", "S607", "S603", "ARG001", "SIM105", "PTH110", "T201", "EM101", "TRY003",
-    "D415", "D403", "EM102", "TRY002", "N801", "S113", "FIX002", "TD005", "RET503",
-    "PTH123", "ARG002", "RUF022",
+    "TD005",    # Missing issue description after `TODO`
+    "TRY002",   # Create your own exception
+    "TRY003",   # Avoid specifying long messages outside the exception class
+    "W391",     # Black line at end of file
 ]
 
 [tool.basedpyright]

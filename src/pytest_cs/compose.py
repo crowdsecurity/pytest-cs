@@ -38,4 +38,4 @@ def compose():
         finally:
             project.down()
 
-    yield closure
+    return closure

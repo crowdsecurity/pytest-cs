@@ -270,6 +270,7 @@ class log_waiters(ContainerWaiterGenerator):
         return pytest.LineMatcher(lines)
 
 
+# TODO: enum
 class Status:
     CREATED: Final = "created"
     RUNNING: Final = "running"

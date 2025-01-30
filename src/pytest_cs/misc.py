@@ -1,5 +1,4 @@
 import pathlib
-from collections.abc import Generator
 
 import pytest
 
@@ -16,5 +15,5 @@ def lookup_project_repo():
 
 
 @pytest.fixture(scope="session")
-def project_repo() -> Generator[pathlib.Path]:
-    yield lookup_project_repo()
+def project_repo() -> pathlib.Path:
+    return lookup_project_repo()

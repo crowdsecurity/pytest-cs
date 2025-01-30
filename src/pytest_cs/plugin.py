@@ -68,7 +68,7 @@ def certs_dir(tmp_path_factory: pytest.TempPathFactory):
 
         return path
 
-    yield closure
+    return closure
 
 
 @pytest.fixture(scope="session")
@@ -76,4 +76,4 @@ def api_key_factory():
     def closure(alphabet: str = string.ascii_letters + string.digits):
         return "".join(secrets.choice(alphabet) for _ in range(32))
 
-    yield closure
+    return closure

@@ -1,4 +1,3 @@
-import os
 import pathlib
 import subprocess
 
@@ -11,7 +10,7 @@ deb_build_done = False
 
 @pytest.fixture
 def skip_unless_deb():
-    if not os.path.exists("/etc/debian_version"):
+    if not pathlib.Path("/etc/debian_version").exists():
         pytest.skip("This test is only for Debian-based systems.")
 
 
@@ -53,7 +52,7 @@ def deb_package_path(
     deb_package_arch: str,
     project_repo: pathlib.Path,
 ):
-    yield project_repo.parent / f"{deb_package_name}_{deb_package_version}_{deb_package_arch}.deb"
+    return project_repo.parent / f"{deb_package_name}_{deb_package_version}_{deb_package_arch}.deb"
 
 
 @pytest.fixture(scope="session")
@@ -63,4 +62,4 @@ def deb_package(deb_package_path: pathlib.Path, project_repo: pathlib.Path):
         deb_package_path.unlink(missing_ok=True)
         dpkg_buildpackage(repodir=project_repo)
         deb_build_done = True
-    yield deb_package_path
+    return deb_package_path
