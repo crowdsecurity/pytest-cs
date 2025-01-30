@@ -1,4 +1,5 @@
 import os
+import pathlib
 import secrets
 import string
 import subprocess
@@ -12,7 +13,7 @@ from _pytest.reports import BaseReport
 keep_kind_cluster = True
 
 
-def systemd_debug(service: str | None = None):
+def systemd_debug(service: str | None = None) -> None:
     if service is None:
         print("No service name provided, can't show journal output")
         return
@@ -36,7 +37,7 @@ def systemd_debug(service: str | None = None):
     print(stdout)
 
 
-def pytest_exception_interact(node: Node, _call: pytest.CallInfo[typing.Any], report: BaseReport):
+def pytest_exception_interact(node: Node, _call: pytest.CallInfo[typing.Any], report: BaseReport) -> None:
     # when a test with the marker "systemd_debug(service)" fails,
     # we dump the status and journal for the systemd unit, but only when
     # running in CI. Interactive runs can use --pdb to debug.
@@ -47,8 +48,8 @@ def pytest_exception_interact(node: Node, _call: pytest.CallInfo[typing.Any], re
 
 
 @pytest.fixture(scope="session")
-def certs_dir(tmp_path_factory: pytest.TempPathFactory):
-    def closure(lapi_hostname: str, agent_ou: str = "agent-ou", bouncer_ou: str = "bouncer-ou"):
+def certs_dir(tmp_path_factory: pytest.TempPathFactory) -> typing.Callable[[str, str, str], pathlib.Path]:
+    def closure(lapi_hostname: str, agent_ou: str = "agent-ou", bouncer_ou: str = "bouncer-ou") -> pathlib.Path:
         path = tmp_path_factory.mktemp("certs")
 
         ca = trustme.CA()
@@ -72,8 +73,8 @@ def certs_dir(tmp_path_factory: pytest.TempPathFactory):
 
 
 @pytest.fixture(scope="session")
-def api_key_factory():
-    def closure(alphabet: str = string.ascii_letters + string.digits):
+def api_key_factory() -> typing.Callable[[str], str]:
+    def closure(alphabet: str = string.ascii_letters + string.digits) -> str:
         return "".join(secrets.choice(alphabet) for _ in range(32))
 
     return closure

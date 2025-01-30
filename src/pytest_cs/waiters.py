@@ -18,7 +18,7 @@ from .helpers import default_timeout
 #       assert ctx.some_other_condition()
 #       assert ctx.yet_another_condition()
 class WaiterGenerator:
-    def __init__(self, timeout: float | None = None, step: float = 0.1):
+    def __init__(self, timeout: float | None = None, step: float = 0.1) -> None:
         if timeout is None:
             timeout = default_timeout()
         self.start: Final = time.monotonic()

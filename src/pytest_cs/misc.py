@@ -3,7 +3,7 @@ import pathlib
 import pytest
 
 
-def lookup_project_repo():
+def lookup_project_repo() -> pathlib.Path:
     """Return the root of the git repository containing the current directory."""
     root = pathlib.Path.cwd()
     while not (root / ".git").exists():

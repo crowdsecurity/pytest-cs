@@ -48,7 +48,6 @@ select = [
 ignore = [
     "ANN",      # Missing type annotations
     "ARG001",   # Unused function argument: `...`
-    "B008",     # Do not perform function calls in argument defaults
     "COM812",   # Trailing comma missing
     "D100",     # Missing docstring in public module
     "D101",     # Missing docstring in public class
@@ -80,7 +79,6 @@ ignore = [
     "TD005",    # Missing issue description after `TODO`
     "TRY002",   # Create your own exception
     "TRY003",   # Avoid specifying long messages outside the exception class
-    "W391",     # Black line at end of file
 ]
 
 [tool.basedpyright]

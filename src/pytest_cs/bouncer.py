@@ -16,23 +16,23 @@ CHILD_SPAWN_TIMEOUT = 2
 
 
 class ProcessWaiterGenerator(WaiterGenerator):
-    def __init__(self, proc: "BouncerProc"):
+    def __init__(self, proc: "BouncerProc") -> None:
         self.proc: Final = proc
         super().__init__()
 
-    def context(self):
+    def context(self) -> "BouncerProc":
         return self.proc
 
 
 class BouncerProc:
-    def __init__(self, popen: subprocess.Popen[str], outpath: pathlib.Path):
+    def __init__(self, popen: subprocess.Popen[str], outpath: pathlib.Path) -> None:
         self.popen: Final = popen
         self.proc: Final = psutil.Process(popen.pid)
         self.outpath: Final = outpath
 
     # wait for at least one child process to spawn
     # TODO: add a name to look for?
-    def wait_for_child(self, timeout: int = CHILD_SPAWN_TIMEOUT):
+    def wait_for_child(self, timeout: int = CHILD_SPAWN_TIMEOUT) -> psutil.Process:
         start = time.monotonic()
         while time.monotonic() - start < timeout:
             children = self.proc.children()
@@ -45,10 +45,10 @@ class BouncerProc:
         for child in self.proc.children():
             child.kill()
 
-    def children(self):
+    def children(self) -> list[psutil.Process]:
         return self.proc.children()
 
-    def get_output(self):
+    def get_output(self) -> pytest.LineMatcher:
         return pytest.LineMatcher(self.outpath.read_text().splitlines())
 
     # TODO: add timeout?
@@ -95,7 +95,7 @@ def bouncer(bouncer_binary: str, tmp_path_factory: pytest.TempPathFactory):
 
 
 @pytest.fixture(scope="session")
-def bouncer_binary(project_repo: pathlib.Path, bouncer_under_test: str):
+def bouncer_binary(project_repo: pathlib.Path, bouncer_under_test: str) -> pathlib.Path:
     binary_path = project_repo / bouncer_under_test
     if not binary_path.exists() or not os.access(binary_path, os.X_OK):
         raise RuntimeError(f"Bouncer binary not found at {binary_path}. Did you build it?")

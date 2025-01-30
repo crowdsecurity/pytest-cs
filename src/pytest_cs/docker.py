@@ -1,4 +1,5 @@
 import contextlib
+import http
 import os
 import time
 from collections.abc import Callable, Iterator
@@ -37,7 +38,7 @@ def flavor(request: pytest.FixtureRequest) -> str:
 
 
 class Container:
-    def __init__(self, cont: docker.models.containers.Container):
+    def __init__(self, cont: docker.models.containers.Container) -> None:
         self.cont: Final = cont
 
     def log_waiters(self, *args, **kw):
@@ -46,7 +47,7 @@ class Container:
     def port_waiters(self, *args, **kw):
         return port_waiters(self.cont, *args, **kw)
 
-    def wait_for_log(self, s: str | list[str], timeout: float | None = None):
+    def wait_for_log(self, s: str | list[str], timeout: float | None = None) -> None:
         if timeout is None:
             timeout = default_timeout()
         if isinstance(s, str):
@@ -55,7 +56,9 @@ class Container:
             with waiter as matcher:
                 matcher.fnmatch_lines(s)
 
-    def wait_for_http(self, port: int, path: str, want_status=None, timeout: float | None = None):
+    def wait_for_http(
+        self, port: int, path: str, want_status: http.HTTPStatus | None = None, timeout: float | None = None
+    ) -> http.HTTPStatus | None:
         if timeout is None:
             timeout = default_timeout()
         for waiter in port_waiters(self.cont, timeout):
@@ -71,11 +74,11 @@ class Container:
 
     # Return the last 'tail' lines of the container's logs (either a number or the string 'all')
     # The default is a measure to avoid performance or memory issues.
-    def log_lines(self, tail: int = 10000):
+    def log_lines(self, tail: int = 10000) -> list[str]:
         return self.cont.logs(tail=tail).decode("utf-8").splitlines()
 
     @property
-    def probe(self):
+    def probe(self) -> "Probe":
         return Probe(self.cont.ports)
 
 
@@ -102,14 +105,14 @@ def pull_and_create_container(
         return docker_client.containers.create(*args, **kwargs)
 
 
-def get_image(version: str, flavor: str):
+def get_image(version: str, flavor: str) -> str:
     if flavor == "full":
         return f"crowdsecurity/crowdsec:{version}"
     return f"crowdsecurity/crowdsec:{version}-{flavor}"
 
 
 @pytest.fixture(scope="session")
-def docker_client():
+def docker_client() -> docker.DockerClient:
     return docker.from_env()
 
 
@@ -210,19 +213,19 @@ def container(
 
 
 class ContainerWaiterGenerator(WaiterGenerator):
-    def __init__(self, cont: docker.models.containers.Container, timeout: float | None = None):
+    def __init__(self, cont: docker.models.containers.Container, timeout: float | None = None) -> None:
         if timeout is None:
             timeout = default_timeout()
         super().__init__(timeout)
         self.cont: Final = cont
 
-    def refresh(self):
+    def refresh(self) -> None:
         self.cont.reload()
         super().refresh()
 
 
 class Probe:
-    def __init__(self, ports):
+    def __init__(self, ports) -> None:
         self.ports: Final = ports
 
     def get_bound_port(self, port: int):
@@ -231,7 +234,7 @@ class Probe:
             return None
         return self.ports[full_port][0]["HostPort"]
 
-    def http_status_code(self, port: int, path: str):
+    def http_status_code(self, port: int, path: str) -> int | None:
         bound_port = self.get_bound_port(port)
         if bound_port is None:
             return None
@@ -246,11 +249,11 @@ class Probe:
 
 
 class port_waiters(ContainerWaiterGenerator):
-    def context(self):
+    def context(self) -> Probe:
         return Probe(self.cont.ports)
 
 
-def wait_for_status(cont: docker.models.containers.Container, status, timeout: float | None = None):
+def wait_for_status(cont: docker.models.containers.Container, status: str, timeout: float | None = None) -> None:
     if timeout is None:
         timeout = default_timeout()
     start = time.monotonic()

@@ -9,15 +9,15 @@ import pytest
 
 # run a Compose v2 project by calling the "docker compose" command
 class ComposeProject:
-    def __init__(self, compose_file: pathlib.Path):
+    def __init__(self, compose_file: pathlib.Path) -> None:
         self.compose_file: Final = compose_file
         self.cmd: Final = ["docker", "compose", "-f", compose_file.as_posix()]
 
-    def up(self):
+    def up(self) -> None:
         cmd = [*self.cmd, "up", "-d"]
         subprocess.run(cmd, check=True)
 
-    def down(self):
+    def down(self) -> None:
         cmd = [*self.cmd, "down"]
         subprocess.run(cmd, check=True)
 
