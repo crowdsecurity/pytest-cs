@@ -41,8 +41,8 @@ def deb_package_arch() -> str:
 
 
 def dpkg_buildpackage(repodir: pathlib.Path) -> None:
-    subprocess.check_call(["make", "clean-debian"], cwd=repodir)
-    subprocess.check_call(["dpkg-buildpackage", "-us", "-uc", "-b"], cwd=repodir)
+    _ = subprocess.check_call(["make", "clean-debian"], cwd=repodir)
+    _ = subprocess.check_call(["dpkg-buildpackage", "-us", "-uc", "-b"], cwd=repodir)
 
 
 @pytest.fixture(scope="session")

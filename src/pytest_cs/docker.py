@@ -3,7 +3,7 @@ import http
 import os
 import time
 from collections.abc import Callable, Iterator
-from typing import Final
+from typing import Final, override
 
 import docker
 import docker.errors
@@ -101,7 +101,7 @@ def pull_and_create_container(
         except ValueError:
             repo = kwargs["image"]
             tag = "latest"
-        docker_client.images.pull(repo, tag)
+        _ = docker_client.images.pull(repo, tag)
         return docker_client.containers.create(*args, **kwargs)
 
 
@@ -160,7 +160,7 @@ def crowdsec(
             yield CrowdsecContainer(cont)
         finally:
             cont.stop(timeout=0)
-            cont.wait()
+            _ = cont.wait()
             cont.reload()
             # we don't remove the container, so that we can inspect it if the test fails
             # cont.remove(force=True)
@@ -204,7 +204,7 @@ def container(
             yield Container(cont)
         finally:
             cont.stop(timeout=0)
-            cont.wait()
+            _ = cont.wait()
             cont.reload()
             # we don't remove the container, so that we can inspect it if the test fails
             # cont.remove(force=True)
@@ -219,6 +219,7 @@ class ContainerWaiterGenerator(WaiterGenerator):
         super().__init__(timeout)
         self.cont: Final = cont
 
+    @override
     def refresh(self) -> None:
         self.cont.reload()
         super().refresh()
@@ -249,6 +250,7 @@ class Probe:
 
 
 class port_waiters(ContainerWaiterGenerator):
+    @override
     def context(self) -> Probe:
         return Probe(self.cont.ports)
 
@@ -268,6 +270,7 @@ def wait_for_status(cont: docker.models.containers.Container, status: str, timeo
 
 
 class log_waiters(ContainerWaiterGenerator):
+    @override
     def context(self) -> pytest.LineMatcher:
         lines = self.cont.logs(tail=10000).decode("utf-8").splitlines()
         return pytest.LineMatcher(lines)

@@ -15,11 +15,11 @@ class ComposeProject:
 
     def up(self) -> None:
         cmd = [*self.cmd, "up", "-d"]
-        subprocess.run(cmd, check=True)
+        _ = subprocess.run(cmd, check=True)
 
     def down(self) -> None:
         cmd = [*self.cmd, "down"]
-        subprocess.run(cmd, check=True)
+        _ = subprocess.run(cmd, check=True)
 
     def ps(self):
         cmd = [*self.cmd, "ps", "--format", "json"]

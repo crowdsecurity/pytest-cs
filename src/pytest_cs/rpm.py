@@ -25,14 +25,14 @@ def rpmbuild(repodir: pathlib.Path, bouncer_under_test: str, version: str, packa
         shutil.rmtree(clone_dir)
     except FileNotFoundError:
         pass
-    subprocess.check_call(["make", "clean-rpm"], cwd=repodir)
-    subprocess.check_call(["git", "clone", repodir, clone_dir])
-    subprocess.check_call(["tar", "cfz", sources / f"v{version}.tar.gz", directory_name], cwd=sources)
+    _ = subprocess.check_call(["make", "clean-rpm"], cwd=repodir)
+    _ = subprocess.check_call(["git", "clone", repodir, clone_dir])
+    _ = subprocess.check_call(["tar", "cfz", sources / f"v{version}.tar.gz", directory_name], cwd=sources)
     shutil.rmtree(clone_dir)
     env = os.environ.copy()
     env["VERSION"] = version
     env["PACKAGE_NUMBER"] = package_number
-    subprocess.check_call(
+    _ = subprocess.check_call(
         ["rpmbuild", "--define", f"_topdir {repodir}/rpm", "-bb", f"rpm/SPECS/{bouncer_under_test}.spec"],
         cwd=repodir,
         env=env,

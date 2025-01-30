@@ -3,7 +3,7 @@ import os
 import pathlib
 import subprocess
 import time
-from typing import Final
+from typing import Final, override
 
 import psutil
 import pytest
@@ -20,6 +20,7 @@ class ProcessWaiterGenerator(WaiterGenerator):
         self.proc: Final = proc
         super().__init__()
 
+    @override
     def context(self) -> "BouncerProc":
         return self.proc
 

@@ -15,7 +15,7 @@ def kind(tmp_path_factory: pytest.TempPathFactory):
     name = "test"
     path = tmp_path_factory.mktemp("kind")
     kind_yml = path / "kind.yml"
-    kind_yml.write_text(
+    _ = kind_yml.write_text(
         textwrap.dedent("""\
         # three node (two workers) cluster config
         kind: Cluster
@@ -42,13 +42,13 @@ def kind(tmp_path_factory: pytest.TempPathFactory):
     clusters = subprocess.run(["kind", "get", "clusters"], stdout=subprocess.PIPE, encoding="utf-8", check=True)
     out = clusters.stdout.splitlines()
     if "No kind clusters found" in out or name not in out:
-        subprocess.run(["kind", "create", "cluster", "--name", name, "--config", kind_yml.as_posix()], check=True)
+        _ = subprocess.run(["kind", "create", "cluster", "--name", name, "--config", kind_yml.as_posix()], check=True)
 
     try:
         yield
     finally:
         if not keep_kind_cluster:
-            subprocess.run(["kind", "delete", "cluster", "--name", name], check=True)
+            _ = subprocess.run(["kind", "delete", "cluster", "--name", name], check=True)
 
 
 @pytest.fixture(scope="session")
@@ -61,10 +61,10 @@ def helm(kind):
         cmd = ["helm", "install", "--create-namespace", release, chart, "--namespace", namespace]
         if values:
             cmd += ["-f", values.as_posix()]
-        subprocess.run(cmd, check=True)
+        _ = subprocess.run(cmd, check=True)
         try:
             yield release
         finally:
-            subprocess.run(["helm", "uninstall", release, "--namespace", namespace], check=True)
+            _ = subprocess.run(["helm", "uninstall", release, "--namespace", namespace], check=True)
 
     return closure
