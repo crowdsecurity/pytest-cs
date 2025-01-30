@@ -18,14 +18,18 @@ def systemd_debug(service: str | None = None):
         return
 
     p = subprocess.Popen(
-        ["systemctl", "status", service], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8",
+        ["systemctl", "status", service], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8"
     )
     stdout, _stderr = p.communicate()
     print(f"--- systemctl status (return code: {p.returncode}) ---")
     print(stdout)
 
     p = subprocess.Popen(
-        ["journalctl", "-xeu", service], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8",
+        ["journalctl", "-xeu", service],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        encoding="utf-8",
     )
     stdout, _stderr = p.communicate()
     print(f"--- journalctl -xeu (return code: {p.returncode}) ---")

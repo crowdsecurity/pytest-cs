@@ -1,10 +1,10 @@
 import time
 from types import TracebackType
-from typing import Final
+from typing import Any, Final
 
 from _pytest.outcomes import Failed
 
-from .helpers import get_timeout
+from .helpers import default_timeout
 
 
 # Implement a constuct to wait for any condition to be true without a busy loop.
@@ -18,7 +18,9 @@ from .helpers import get_timeout
 #       assert ctx.some_other_condition()
 #       assert ctx.yet_another_condition()
 class WaiterGenerator:
-    def __init__(self, timeout: int = get_timeout(), step: float = 0.1):
+    def __init__(self, timeout: float | None = None, step: float = 0.1):
+        if timeout is None:
+            timeout = default_timeout()
         self.start: Final = time.monotonic()
         self.timeout: float = timeout
         self.step: Final = step  # wait between iterations
@@ -67,7 +69,7 @@ class WaiterGenerator:
     # Enter the with: block
     # self.failure is reset because we only care about the last failure
     # (i.e. the one that caused the timeout)
-    def __enter__(self):
+    def __enter__(self) -> Any:  # pyright:ignore[reportExplicitAny]
         self.failure = None
         return self.context()
 
@@ -77,7 +79,10 @@ class WaiterGenerator:
     # we always return True to prevent the exception from propagating
     # (we'll raise it on the last iteration)
     def __exit__(
-        self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None,
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
     ) -> bool:
         if exc_type is None:
             self.done = True

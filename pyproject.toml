@@ -46,24 +46,29 @@ select = [
 ]
 
 ignore = [
-    "B008",     # do not perform function calls in argument defaults
-    "S101",     # use of 'assert' detected
-    "D100",     # missing docstring in public module
-    "D101",     # missing docstring in public class
-    "D102",     # missing docstring in public method
-    "D103",     # missing docstring in public function
-    "D104",     # missing docstring in public package
-    "D105",     # missing docstring in magic method
-    "D107",     # missing docstring in __init__
+    "B008",     # Do not perform function calls in argument defaults
+    "S101",     # Use of 'assert' detected
+    "D100",     # Missing docstring in public module
+    "D101",     # Missing docstring in public class
+    "D102",     # Missing docstring in public method
+    "D103",     # Missing docstring in public function
+    "D104",     # Missing docstring in public package
+    "D105",     # Missing docstring in magic method
+    "D107",     # Missing docstring in __init__
     "D203",     # incorrect-blank-line-before-class
     "D213",     # multi-line-summary-second-line
     "ERA001",   # Found commented-out code
-    "W391",     # black line at end of file
+    "W391",     # Black line at end of file
+    "FIX003",   # Line contains XXX, consider resolving the issue
+    "TD001",    # Invalid TODO tag: `XXX`
+    "TD002",    # Missing author in TODO
+    "TD003",    # Missing issue link for this TODO
+    "TD004",    # Missing colon in TODO
 
-    "ANN",      # missing type annotations
+    "ANN",      # Missing type annotations
+    "COM812",   # Trailing comma missing
 
     "PT022", "PLW0603", "S607", "S603", "ARG001", "SIM105", "PTH110", "T201", "EM101", "TRY003",
-    "FIX003", "TD003", "TD004", "TD002", "TD001",
     "D415", "D403", "EM102", "TRY002", "N801", "S113", "FIX002", "TD005", "RET503",
     "PTH123", "ARG002", "RUF022",
 ]
@@ -79,5 +84,4 @@ reportCallInDefaultInitializer = "none"
 reportImplicitOverride = "none"
 reportUnusedCallResult = "none"
 reportUnusedParameter = "none"
-reportUnsupportedDunderAll = "none"
 reportAny = "none"

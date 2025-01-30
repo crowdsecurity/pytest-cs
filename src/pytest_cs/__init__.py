@@ -51,7 +51,6 @@ from .waiters import (
 )
 
 __all__ = [
-    "lib",
     "api_key_factory",
     "bouncer",
     "bouncer_binary",

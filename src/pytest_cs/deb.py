@@ -48,7 +48,10 @@ def dpkg_buildpackage(repodir: pathlib.Path):
 
 @pytest.fixture(scope="session")
 def deb_package_path(
-    deb_package_name: str, deb_package_version: str, deb_package_arch: str, project_repo: pathlib.Path,
+    deb_package_name: str,
+    deb_package_version: str,
+    deb_package_arch: str,
+    project_repo: pathlib.Path,
 ):
     yield project_repo.parent / f"{deb_package_name}_{deb_package_version}_{deb_package_arch}.deb"
 

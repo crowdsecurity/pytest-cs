@@ -1,9 +1,9 @@
 import os
 
 
-def get_timeout(default: int = 20):
-    t = os.getenv("CROWDSEC_TEST_TIMEOUT", default)
+def default_timeout() -> float:
+    t = os.getenv("CROWDSEC_TEST_TIMEOUT", "20")
     try:
-        return int(t)
+        return float(t)
     except (ValueError, TypeError):
-        raise Exception(f"Invalid CROWDSEC_TEST_TIMEOUT ({t}): must be an integer") from None
+        raise Exception(f"Invalid CROWDSEC_TEST_TIMEOUT ({t}): must be an integer or float") from None
