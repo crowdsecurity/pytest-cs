@@ -1,21 +1,19 @@
-
-from pathlib import Path
+import pathlib
 
 import pytest
 
 
-def lookup_project_repo():
+def lookup_project_repo() -> pathlib.Path:
     """Return the root of the git repository containing the current directory."""
-
-    root = Path.cwd()
-    while not (root / '.git').exists():
+    root = pathlib.Path.cwd()
+    while not (root / ".git").exists():
         root = root.parent
-        if root == Path('/'):
-            raise RuntimeError('No git repo found')
+        if root == pathlib.Path("/"):
+            raise RuntimeError("No git repo found")
 
     return root
 
 
-@pytest.fixture(scope='session')
-def project_repo():
-    yield lookup_project_repo()
+@pytest.fixture(scope="session")
+def project_repo() -> pathlib.Path:
+    return lookup_project_repo()
