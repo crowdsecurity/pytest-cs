@@ -6,7 +6,6 @@ from _pytest.outcomes import Failed
 
 from .helpers import default_timeout
 
-
 T = TypeVar("T")
 
 

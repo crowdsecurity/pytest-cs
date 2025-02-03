@@ -3,7 +3,7 @@ import http
 import os
 import time
 from collections.abc import Callable, Iterator
-from typing import Final, override, TypeVar
+from typing import Final, TypeVar, override
 
 import docker
 import docker.errors
