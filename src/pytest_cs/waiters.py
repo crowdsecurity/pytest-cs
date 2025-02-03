@@ -1,10 +1,13 @@
 import time
 from types import TracebackType
-from typing import Any, Final
+from typing import Final, Generic, TypeVar
 
 from _pytest.outcomes import Failed
 
 from .helpers import default_timeout
+
+
+T = TypeVar("T")
 
 
 # Implement a constuct to wait for any condition to be true without a busy loop.
@@ -17,7 +20,7 @@ from .helpers import default_timeout
 #       assert ctx.some_condition()
 #       assert ctx.some_other_condition()
 #       assert ctx.yet_another_condition()
-class WaiterGenerator:
+class WaiterGenerator(Generic[T]):
     def __init__(self, timeout: float | None = None, step: float = 0.1) -> None:
         if timeout is None:
             timeout = default_timeout()
@@ -57,8 +60,8 @@ class WaiterGenerator:
         if self.failure:
             raise self.failure
 
-    # this is returned by the context manager.
-    def context(self):
+    def context(self) -> T:
+        """Return the context from the context manager. Subclasses override this to return the actual T (e.g. a Probe)."""
         raise NotImplementedError
 
     # this is called before each iteration to refresh the state
@@ -69,7 +72,7 @@ class WaiterGenerator:
     # Enter the with: block
     # self.failure is reset because we only care about the last failure
     # (i.e. the one that caused the timeout)
-    def __enter__(self) -> Any:  # pyright:ignore[reportExplicitAny]
+    def __enter__(self) -> T:
         self.failure = None
         return self.context()
 

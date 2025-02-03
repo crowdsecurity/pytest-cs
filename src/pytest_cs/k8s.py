@@ -52,7 +52,7 @@ def kind(tmp_path_factory: pytest.TempPathFactory):
 
 
 @pytest.fixture(scope="session")
-def helm(kind):
+def helm(kind):  # pyright:ignore[reportUnusedParameter]
     # return a context manager that will create a release, yield its name, and
     # remove it when the context manager exits
     @contextlib.contextmanager

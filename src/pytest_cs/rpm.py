@@ -60,7 +60,7 @@ def rpm_package_path(
     rpm_package_version: str,
     rpm_package_number: str,
     rpm_package_name: str,
-    bouncer_under_test: str,
+    bouncer_under_test: str,  # pyright:ignore[reportUnusedParameter]
 ) -> pathlib.Path:
     distversion, arch = subprocess.check_output(["uname", "-r"]).rstrip().decode().split(".")[-2:]
     filename = f"{rpm_package_name}-{rpm_package_version}-{rpm_package_number}.{distversion}.{arch}.rpm"

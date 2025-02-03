@@ -3,7 +3,7 @@ import http
 import os
 import time
 from collections.abc import Callable, Iterator
-from typing import Final, override
+from typing import Final, override, TypeVar
 
 import docker
 import docker.errors
@@ -212,7 +212,10 @@ def container(
     return closure
 
 
-class ContainerWaiterGenerator(WaiterGenerator):
+T = TypeVar("T")
+
+
+class ContainerWaiterGenerator(WaiterGenerator[T]):
     def __init__(self, cont: docker.models.containers.Container, timeout: float | None = None) -> None:
         if timeout is None:
             timeout = default_timeout()
@@ -226,7 +229,7 @@ class ContainerWaiterGenerator(WaiterGenerator):
 
 
 class Probe:
-    def __init__(self, ports) -> None:
+    def __init__(self, ports: dict[str, list[dict[str, str]]]) -> None:
         self.ports: Final = ports
 
     def get_bound_port(self, port: int):
@@ -235,7 +238,7 @@ class Probe:
             return None
         return self.ports[full_port][0]["HostPort"]
 
-    def http_status_code(self, port: int, path: str) -> int | None:
+    def http_status_code(self, port: int, path: str) -> http.HTTPStatus | None:
         bound_port = self.get_bound_port(port)
         if bound_port is None:
             return None
@@ -246,10 +249,10 @@ class Probe:
             r = requests.get(url)
         except requests.exceptions.ConnectionError:
             return None
-        return r.status_code
+        return http.HTTPStatus(r.status_code)
 
 
-class port_waiters(ContainerWaiterGenerator):
+class port_waiters(ContainerWaiterGenerator[Probe]):
     @override
     def context(self) -> Probe:
         return Probe(self.cont.ports)
@@ -269,7 +272,7 @@ def wait_for_status(cont: docker.models.containers.Container, status: str, timeo
     raise TimeoutError(f"Container {cont.name} ({cont.status}) did not reach state {status} in {timeout} seconds")
 
 
-class log_waiters(ContainerWaiterGenerator):
+class log_waiters(ContainerWaiterGenerator[pytest.LineMatcher]):
     @override
     def context(self) -> pytest.LineMatcher:
         lines = self.cont.logs(tail=10000).decode("utf-8").splitlines()

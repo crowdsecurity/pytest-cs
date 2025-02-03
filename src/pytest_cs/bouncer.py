@@ -15,7 +15,7 @@ from .waiters import WaiterGenerator
 CHILD_SPAWN_TIMEOUT = 2
 
 
-class ProcessWaiterGenerator(WaiterGenerator):
+class ProcessWaiterGenerator(WaiterGenerator["BouncerProc"]):
     def __init__(self, proc: "BouncerProc") -> None:
         self.proc: Final = proc
         super().__init__()
