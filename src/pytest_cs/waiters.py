@@ -60,7 +60,10 @@ class WaiterGenerator(Generic[T]):
             raise self.failure
 
     def context(self) -> T:
-        """Return the context from the context manager. Subclasses override this to return the actual T (e.g. a Probe)."""
+        """Return the context from the context manager.
+
+        Subclasses override this to return the actual T (e.g. a Probe).
+        """
         raise NotImplementedError
 
     # this is called before each iteration to refresh the state
