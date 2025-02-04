@@ -237,7 +237,7 @@ wheels = [
 
 [[package]]
 name = "pytest-cs"
-version = "0.7.20"
+version = "0.7.21"
 source = { editable = "." }
 dependencies = [
     { name = "docker" },
