@@ -71,6 +71,7 @@ class Container:
                 if want_status is not None:
                     assert status == want_status
                 return status
+        return None
 
     # Return the last 'tail' lines of the container's logs (either a number or the string 'all')
     # The default is a measure to avoid performance or memory issues.
@@ -131,7 +132,8 @@ def crowdsec(
         wait_status = kw.pop("wait_status", Status.RUNNING)
 
         if "image" in kw and "flavor" in kw:
-            raise ValueError("cannot specify both image and flavor")
+            msg = "cannot specify both image and flavor"
+            raise ValueError(msg)
         if "image" not in kw:
             kw["image"] = get_image(crowdsec_version, kw.pop("flavor", "full"))
         kw.setdefault("detach", True)
@@ -246,7 +248,7 @@ class Probe:
         url = f"http://localhost:{bound_port}{path}"
 
         try:
-            r = requests.get(url)
+            r = requests.get(url, timeout=30)
         except requests.exceptions.ConnectionError:
             return None
         return http.HTTPStatus(r.status_code)
@@ -269,7 +271,8 @@ def wait_for_status(cont: docker.models.containers.Container, status: str, timeo
             return
         time.sleep(0.1)
         now = time.monotonic()
-    raise TimeoutError(f"Container {cont.name} ({cont.status}) did not reach state {status} in {timeout} seconds")
+    msg = f"Container {cont.name} ({cont.status}) did not reach state {status} in {timeout} seconds"
+    raise TimeoutError(msg)
 
 
 class log_waiters(ContainerWaiterGenerator[pytest.LineMatcher]):

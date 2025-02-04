@@ -1,3 +1,4 @@
+import contextlib
 import os
 import pathlib
 import shutil
@@ -21,10 +22,8 @@ def rpmbuild(repodir: pathlib.Path, bouncer_under_test: str, version: str, packa
 
     sources = repodir / "rpm/SOURCES"
     clone_dir = sources / directory_name
-    try:
+    with contextlib.suppress(FileNotFoundError):
         shutil.rmtree(clone_dir)
-    except FileNotFoundError:
-        pass
     _ = subprocess.check_call(["make", "clean-rpm"], cwd=repodir)
     _ = subprocess.check_call(["git", "clone", repodir, clone_dir])
     _ = subprocess.check_call(["tar", "cfz", sources / f"v{version}.tar.gz", directory_name], cwd=sources)
@@ -60,7 +59,7 @@ def rpm_package_path(
     rpm_package_version: str,
     rpm_package_number: str,
     rpm_package_name: str,
-    bouncer_under_test: str,  # pyright:ignore[reportUnusedParameter]
+    bouncer_under_test: str,  # pyright:ignore[reportUnusedParameter]  # noqa: ARG001
 ) -> pathlib.Path:
     distversion, arch = subprocess.check_output(["uname", "-r"]).rstrip().decode().split(".")[-2:]
     filename = f"{rpm_package_name}-{rpm_package_version}-{rpm_package_number}.{distversion}.{arch}.rpm"

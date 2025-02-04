@@ -2,6 +2,7 @@ import contextlib
 import pathlib
 import subprocess
 import textwrap
+from collections.abc import Iterator
 
 import pytest
 
@@ -11,7 +12,7 @@ keep_kind_cluster = True
 # this won't create a new cluster if one already exists
 # and will optionally leave the cluster running after the tests
 @pytest.fixture(scope="session")
-def kind(tmp_path_factory: pytest.TempPathFactory):
+def kind(tmp_path_factory: pytest.TempPathFactory) -> Iterator[None]:
     name = "test"
     path = tmp_path_factory.mktemp("kind")
     kind_yml = path / "kind.yml"
@@ -52,7 +53,7 @@ def kind(tmp_path_factory: pytest.TempPathFactory):
 
 
 @pytest.fixture(scope="session")
-def helm(kind):  # pyright:ignore[reportUnusedParameter]
+def helm(kind):  # pyright:ignore[reportUnusedParameter]  # noqa: ARG001
     # return a context manager that will create a release, yield its name, and
     # remove it when the context manager exits
     @contextlib.contextmanager

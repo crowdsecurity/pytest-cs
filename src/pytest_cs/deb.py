@@ -1,5 +1,6 @@
 import pathlib
 import subprocess
+from collections.abc import Iterator
 
 import pytest
 
@@ -14,7 +15,7 @@ def skip_unless_deb() -> None:
         pytest.skip("This test is only for Debian-based systems.")
 
 
-def enum_package_names():
+def enum_package_names() -> Iterator[str]:
     repo = lookup_project_repo()
     try:
         with (repo / "debian/control").open() as f:

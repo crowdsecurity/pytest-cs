@@ -9,7 +9,8 @@ def lookup_project_repo() -> pathlib.Path:
     while not (root / ".git").exists():
         root = root.parent
         if root == pathlib.Path("/"):
-            raise RuntimeError("No git repo found")
+            msg = "No git repo found"
+            raise RuntimeError(msg)
 
     return root
 

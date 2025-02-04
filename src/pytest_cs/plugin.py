@@ -38,7 +38,7 @@ def systemd_debug(service: str | None = None) -> None:
     print(stdout)
 
 
-def pytest_exception_interact(node: Node, _call: pytest.CallInfo[Any], report: BaseReport) -> None:
+def pytest_exception_interact(node: Node, _call: pytest.CallInfo[Any], report: BaseReport) -> None:  # pyright:ignore[reportExplicitAny]
     # when a test with the marker "systemd_debug(service)" fails,
     # we dump the status and journal for the systemd unit, but only when
     # running in CI. Interactive runs can use --pdb to debug.

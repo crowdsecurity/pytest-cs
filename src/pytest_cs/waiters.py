@@ -1,4 +1,5 @@
 import time
+from collections.abc import Iterator
 from types import TracebackType
 from typing import Final, Generic, TypeVar
 
@@ -41,7 +42,7 @@ class WaiterGenerator(Generic[T]):
     #
     # On its last iteration before the timeout, any exception
     # is allowed to propagate and will cause the test to fail.
-    def __iter__(self):
+    def __iter__(self) -> Iterator["WaiterGenerator[T]"]:
         while not self.done and (self.start + self.timeout > time.monotonic()):
             self.refresh()
             yield self
@@ -68,7 +69,7 @@ class WaiterGenerator(Generic[T]):
 
     # this is called before each iteration to refresh the state
     # of the object: reload a container, etc.
-    def refresh(self):
+    def refresh(self) -> None:
         pass
 
     # Enter the with: block
