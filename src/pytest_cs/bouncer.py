@@ -40,7 +40,8 @@ class BouncerProc:
             if children:
                 return children[0]
             time.sleep(0.1)
-        raise TimeoutError("No child process found")
+        msg = "No child process found"
+        raise TimeoutError(msg)
 
     def halt_children(self) -> None:
         for child in self.proc.children():
@@ -53,7 +54,7 @@ class BouncerProc:
         return pytest.LineMatcher(self.outpath.read_text().splitlines())
 
     # TODO: add timeout?
-    def wait_for_lines_fnmatch(self, s: list[str]):
+    def wait_for_lines_fnmatch(self, s: list[str]) -> None:
         for waiter in ProcessWaiterGenerator(self):
             with waiter as p:
                 p.get_output().fnmatch_lines(s)
@@ -99,5 +100,6 @@ def bouncer(bouncer_binary: str, tmp_path_factory: pytest.TempPathFactory):
 def bouncer_binary(project_repo: pathlib.Path, bouncer_under_test: str) -> pathlib.Path:
     binary_path = project_repo / bouncer_under_test
     if not binary_path.exists() or not os.access(binary_path, os.X_OK):
-        raise RuntimeError(f"Bouncer binary not found at {binary_path}. Did you build it?")
+        msg = f"Bouncer binary not found at {binary_path}. Did you build it?"
+        raise RuntimeError(msg)
     return binary_path
