@@ -122,7 +122,6 @@ def crowdsec(
     docker_client: docker.DockerClient,
     crowdsec_version: str,
     docker_network: str,
-    stop_timeout: int = 1,
 ) -> Callable[..., contextlib.AbstractContextManager[CrowdsecContainer]]:
     # return a context manager that will create a container, yield it, and
     # stop it when the context manager exits
@@ -131,6 +130,7 @@ def crowdsec(
         kw = kwargs.copy()
 
         wait_status = kw.pop("wait_status", Status.RUNNING)
+        stop_timeout: int = kw.pop("stop_timeout", 1)
 
         if "image" in kw and "flavor" in kw:
             msg = "cannot specify both image and flavor"
@@ -175,7 +175,6 @@ def crowdsec(
 def container(
     docker_client: docker.DockerClient,
     docker_network: str,
-    stop_timeout: int = 1,
 ) -> Callable[..., contextlib.AbstractContextManager[Container]]:
     # return a context manager that will create a container, yield it, and
     # stop it when the context manager exits
@@ -184,6 +183,7 @@ def container(
         kw = kwargs.copy()
 
         wait_status = kw.pop("wait_status", Status.RUNNING)
+        stop_timeout: int = kw.pop("stop_timeout", 1)
 
         kw.setdefault("detach", True)
         kw.setdefault("auto_remove", False)
