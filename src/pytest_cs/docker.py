@@ -122,6 +122,7 @@ def crowdsec(
     docker_client: docker.DockerClient,
     crowdsec_version: str,
     docker_network: str,
+    stop_timeout: float = 1.0,
 ) -> Callable[..., contextlib.AbstractContextManager[CrowdsecContainer]]:
     # return a context manager that will create a container, yield it, and
     # stop it when the context manager exits
@@ -161,7 +162,7 @@ def crowdsec(
         try:
             yield CrowdsecContainer(cont)
         finally:
-            cont.stop(timeout=0)
+            cont.stop(timeout=stop_timeout)
             _ = cont.wait()
             cont.reload()
             # we don't remove the container, so that we can inspect it if the test fails
@@ -174,6 +175,7 @@ def crowdsec(
 def container(
     docker_client: docker.DockerClient,
     docker_network: str,
+    stop_timeout: float = 1.0,
 ) -> Callable[..., contextlib.AbstractContextManager[Container]]:
     # return a context manager that will create a container, yield it, and
     # stop it when the context manager exits
@@ -205,7 +207,7 @@ def container(
         try:
             yield Container(cont)
         finally:
-            cont.stop(timeout=0)
+            cont.stop(timeout=stop_timeout)
             _ = cont.wait()
             cont.reload()
             # we don't remove the container, so that we can inspect it if the test fails
