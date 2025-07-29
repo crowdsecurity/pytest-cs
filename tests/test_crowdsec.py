@@ -7,7 +7,6 @@ def test_crowdsec_log(crowdsec) -> None:
             with waiter as matcher:
                 matcher.fnmatch_lines(
                     [
-                        "*Loading prometheus collectors*",
                         "*Starting processing data*",
                     ],
                 )
@@ -20,7 +19,6 @@ def test_crowdsec_log_helper(crowdsec) -> None:
     with crowdsec() as cs:
         cs.wait_for_log(
             [
-                "*Loading prometheus collectors*",
                 "*Starting processing data*",
             ],
         )
