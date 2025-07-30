@@ -146,7 +146,7 @@ def crowdsec(
         kw["environment"].setdefault("DISABLE_ONLINE_API", "true")
         kw["environment"].setdefault("NO_HUB_UPGRADE", "true")
         kw["environment"].setdefault("CROWDSEC_FEATURE_DISABLE_HTTP_RETRY_BACKOFF", "true")
-
+        kw["environment"].setdefault("CROWDSEC_BYPASS_DB_VOLUME_CHECK", "true")
         # forced
         kw["environment"]["CI_TESTING"] = "true"
 
